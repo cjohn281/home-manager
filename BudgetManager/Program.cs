@@ -1,5 +1,6 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using BudgetManager.Data;
 
 Env.Load();
 
