@@ -33,7 +33,17 @@ namespace BudgetManager.Controllers
                 return View();
             }
 
-            var claims = new List<Claim>
+            var connection = _dbContext.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+                await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = $"SET LOCAL homeManager.current_uid = '{user.Id}'";
+                await command.ExecuteNonQueryAsync();
+            }
+
+                var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Name),
                 new Claim(ClaimTypes.Email, user.Email)
