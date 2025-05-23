@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace BudgetManager.Helpers
+namespace AccountManager.Helpers
 {
     public class PasswordHelper
     {

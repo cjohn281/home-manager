@@ -24,8 +24,15 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <form id="logoutForm" asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                                <button type="submit"
+                                        class="nav-link btn btn-link text-dark"
+                                        style="cursor:pointer; border:none; background:none; padding-top:8px;">
+                                    Logout
+                                </button>
+                            </form>
                         </li>
+
                     </ul>
                 </div>
             </div>

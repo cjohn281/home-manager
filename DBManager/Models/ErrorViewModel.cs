@@ -1,4 +1,4 @@
-namespace AccountManager.Models;
+namespace DBManager.Models;
 
 public class ErrorViewModel
 {

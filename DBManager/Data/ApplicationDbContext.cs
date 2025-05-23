@@ -1,7 +1,9 @@
-﻿using BudgetManager.Models;
+﻿using DBManager.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 
-namespace BudgetManager.Data
+namespace DBManager.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -20,4 +22,3 @@ namespace BudgetManager.Data
         public DbSet<TransactionType> TransactionTypes { get; set; }
     }
 }
-

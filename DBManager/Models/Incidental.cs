@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BudgetManager.Models
+namespace DBManager.Models
 {
     [Table("tbl_incidental")]
     public class Incidental

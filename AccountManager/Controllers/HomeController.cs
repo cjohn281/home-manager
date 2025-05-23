@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using AccountManager.Models;
+using DBManager.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AccountManager.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;

@@ -1,27 +1,33 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
-using BudgetManager.Data;
+using DBManager.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 Env.Load("../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<DataProtectionContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<DataProtectionContext>()
+    .SetApplicationName("HomeManager");
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/AccountManager/Account/Login";
+        options.Cookie.Name = "SharedAuthCookie";
+    });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
-{
-    options.Cookie.Name = "HomeManagerCookie";
-    options.LoginPath = "/Account/Login";
 
-    options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    options.SlidingExpiration = true;
-});
+// Add services to the container.
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
