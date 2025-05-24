@@ -42,6 +42,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UsePathBase("/budgetmanager");
 app.UseRouting();
 
 app.UseAuthentication();

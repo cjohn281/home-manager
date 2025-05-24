@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using BudgetManager.Models;
+using DBManager.Models;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BudgetManager.Controllers;

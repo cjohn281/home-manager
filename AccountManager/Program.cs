@@ -43,6 +43,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UsePathBase("/accountmanager");
 app.UseRouting();
 
 app.UseAuthentication();

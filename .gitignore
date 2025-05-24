@@ -7,7 +7,7 @@
 
 .env
 
-AppKeys/
+db_schema.txt
 
 # User-specific files
 *.suo
