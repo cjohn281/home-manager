@@ -15,6 +15,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
             return View();

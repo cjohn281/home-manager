@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using home_manager.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace home_manager.Controllers
@@ -13,11 +14,13 @@ namespace home_manager.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
+        [Authorize]
         public IActionResult Privacy()
         {
             return View();
