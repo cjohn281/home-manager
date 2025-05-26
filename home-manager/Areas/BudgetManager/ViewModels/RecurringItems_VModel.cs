@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using home_manager.Models;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
@@ -89,17 +90,39 @@ namespace home_manager.Areas.BudgetManager.ViewModels
             public bool PaidOff { get; set; } = false;
         }
 
-        public async Task LoadItemsAsync(string connectionString)
+        public async Task LoadRecurringItemsAsync(string connectionString, int categoryId)
         {
             using var connection = new NpgsqlConnection(connectionString);
             await connection.OpenAsync(); // Ensure the connection is opened
             Items = (await connection.QueryAsync<RecurringItem>(
-                "SELECT * FROM fnc_get_recurring_items();"
+                $"SELECT * FROM fnc_get_recurring_items({categoryId});"
             )).ToList();
 
             TotalMinimumDue = Items.Sum(item => item.MinimumDue);
 
             TotalBalance = Items.Sum(item => item.Balance ?? 0);
+        }
+    }
+
+    public class RecurringCategoryFilterItems_VModel
+    {
+        public List<RecurringCategory> Items { get; set; } = new();
+
+        public class RecurringCategory
+        {
+            [Required]
+            public int CategoryId { get; set; }
+            [Required]
+            public string CategoryName { get; set; } = String.Empty;
+        }
+
+        public async Task LoadRecurringCategoryFilterItems(string connectionString)
+        {
+            using var connection = new NpgsqlConnection(connectionString);
+            await connection.OpenAsync();
+            Items = (await connection.QueryAsync<RecurringCategory>(
+                "SELECT * FROM fnc_get_recurring_category_filter_items();"
+            )).ToList();
         }
     }
 }

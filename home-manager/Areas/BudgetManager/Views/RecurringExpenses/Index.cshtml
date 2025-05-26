@@ -1,0 +1,127 @@
+﻿@model home_manager.Areas.BudgetManager.ViewModels.RecurringCategoryFilterItems_VModel
+@{
+    ViewData["Title"] = "Recurring Items";
+}
+
+<style>
+    .container {
+        max-width: 95vw !important;
+        margin: 0 auto;
+        padding: 0 10px;
+    }
+
+    .card {
+        width: 100%;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1rem 0.5rem;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+        .table td, .table th {
+            padding: 0.5rem 0.25rem;
+        }
+</style>
+
+<div class="container">
+    <h2 class="mb-4">Recurring Expenses</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="categoryFilter" class="form-label">Filter by Category</label>
+                        <select id="categoryFilter" class="form-select" onchange="loadRecurringExpensesTable(this.value)">
+                            <option value="0">All Categories</option>
+                            @foreach (var category in Model.Items)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th class="text-end">Minimum Due</th>
+                            <th class="text-end">Balance</th>
+                            <th class="text-end">Interest Rate</th>
+                            <th></th>
+                            <th>Day</th>
+                            <th>Jan</th>
+                            <th>Feb</th>
+                            <th>Mar</th>
+                            <th>Apr</th>
+                            <th>May</th>
+                            <th>Jun</th>
+                            <th>Jul</th>
+                            <th>Aug</th>
+                            <th>Sep</th>
+                            <th>Oct</th>
+                            <th>Nov</th>
+                            <th>Dec</th>
+                            <th>Paid Off</th>
+                        </tr>
+                    </thead>
+                    <tbody id="_RecurringExpensesTable">
+                        <!-- Recurring Expenses Table content will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load the initial table data
+            loadRecurringExpensesTable(0);
+        });
+
+        function loadRecurringExpensesTable(categorId) {
+            $.ajax({
+                url: '@Url.Action("GetRecurringExpensesTable", "RecurringExpenses")',
+                type: 'POST',
+                data: { CategoryId: categorId },
+                success: function (data) {
+                    $('#_RecurringExpensesTable').html(data);
+                    loadStyles();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading recurring expenses:', error);
+                }
+            });
+        }
+
+        function loadStyles() {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+            $('.table input[type="checkbox"]').each(function() {
+                const td = $(this).closest('td');
+                if ($(this).is(':checked')) {
+                    td.addClass('table-success');
+                } else {
+                    // td.addClass('table-danger');
+                }
+            });
+        }
+    </script>
+}
