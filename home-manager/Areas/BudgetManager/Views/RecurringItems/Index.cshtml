@@ -1,0 +1,117 @@
+﻿@model home_manager.Areas.BudgetManager.ViewModels.RecurringItems_VModel
+@{
+    ViewData["Title"] = "Recurring Items";
+}
+
+<div class="container">
+    <h2 class="mb-4">Recurring Expenses</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Minimum Due</th>
+                            <th>Balance</th>
+                            <th>Interest Rate</th>
+                            <th>Day</th>
+                            <th>Jan</th>
+                            <th>Feb</th>
+                            <th>Mar</th>
+                            <th>Apr</th>
+                            <th>May</th>
+                            <th>Jun</th>
+                            <th>Jul</th>
+                            <th>Aug</th>
+                            <th>Sep</th>
+                            <th>Oct</th>
+                            <th>Nov</th>
+                            <th>Dec</th>
+                            <th>Paid Off</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td class="text-end"><strong>@Model.TotalMinimumDue.ToString("C")</strong></td>
+                            <td class="text-end"><strong>@Model.TotalBalance.ToString("C")</strong></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <span data-bs-toggle="tooltip" data-bs-placement="right" title="@item.Description">
+                                            @item.Name
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @item.Name
+                                    }
+                                </td>
+                                <td>@(item.CategoryName ?? "Uncategorized")</td>
+                                <td class="text-end">@item.MinimumDue.ToString("C")</td>
+                                <td class="text-end">@(item.Balance?.ToString("C") ?? "-")</td>
+                                <td class="text-end">@(item.InterestRate.HasValue ? $"{(item.InterestRate * 100):F2}%" : "-")</td>
+                                <td class="text-center">@item.DayOfMonth</td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.January ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.February ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.March ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.April ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.May ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.June ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.July ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.August ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.September ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.October ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.November ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.December ? "checked" : "")></td>
+                                <td class="text-center"><input type="checkbox" disabled @(item.PaidOff ? "checked" : "")></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize Bootstrap tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+            $('.table input[type="checkbox"]').each(function() {
+                const td = $(this).closest('td');
+                if ($(this).is(':checked')) {
+                    td.addClass('table-success');
+                } else {
+                    td.addClass('table-danger');
+                }
+            })
+        });
+    </script>
+}
