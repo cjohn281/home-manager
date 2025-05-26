@@ -96,6 +96,7 @@
         });
 
         function loadRecurringExpensesTable(categorId) {
+            poster.on("Loading");
             $.ajax({
                 url: '@Url.Action("GetRecurringExpensesTable", "RecurringExpenses")',
                 type: 'POST',
@@ -106,6 +107,9 @@
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading recurring expenses:', error);
+                },
+                complete: function() {
+                    poster.off();
                 }
             });
         }
