@@ -37,8 +37,8 @@
                         <tr>
                             <td></td>
                             <td></td>
-                            <td class="text-end"><strong>@Model.TotalMinimumDue.ToString("C")</strong></td>
-                            <td class="text-end"><strong>@Model.TotalBalance.ToString("C")</strong></td>
+                            <td class="text-end"><strong>@Model.FormatCurrency(Model.TotalMinimumDue)</strong></td>
+                            <td class="text-end"><strong>@Model.FormatCurrency(Model.TotalBalance)</strong></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -71,8 +71,8 @@
                                     }
                                 </td>
                                 <td>@(item.CategoryName ?? "Uncategorized")</td>
-                                <td class="text-end">@item.MinimumDue.ToString("C")</td>
-                                <td class="text-end">@(item.Balance?.ToString("C") ?? "-")</td>
+                                <td class="text-end">@Model.FormatCurrency(item.MinimumDue)</td>
+                                <td class="text-end">@(item.Balance.HasValue ? Model.FormatCurrency(item.Balance.Value) : "-")</td>
                                 <td class="text-end">@(item.InterestRate.HasValue ? $"{(item.InterestRate * 100):F2}%" : "-")</td>
                                 <td class="text-center">@item.DayOfMonth</td>
                                 <td class="text-center"><input type="checkbox" disabled @(item.January ? "checked" : "")></td>

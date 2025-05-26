@@ -2,11 +2,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace home_manager.Areas.BudgetManager.ViewModels
 {
     public class RecurringItems_VModel
     {
+        private readonly CultureInfo _cultureInfo = new("en-US");
+
+        public string FormatCurrency(decimal amount)
+        {
+            return amount.ToString("C", _cultureInfo);
+        }
+
         public List<RecurringItem> Items { get; set; } = new();
 
         [Required]
