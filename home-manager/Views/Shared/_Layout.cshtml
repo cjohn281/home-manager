@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home Manager - @ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/home_manager.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" asp-protocol="https" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" asp-protocol="https" />
+    @Html.AntiForgeryToken()
 </head>
 <body>
     <header>
@@ -43,10 +43,10 @@
             &copy; 2025 - Home Manager
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/jquery-poster.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true" asp-protocol="https"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true" asp-protocol="https"></script>
+    <script src="~/js/site.js" asp-append-version="true" asp-protocol="https"></script>
+    <script src="~/js/jquery-poster.js" asp-append-version="true" asp-protocol="https"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

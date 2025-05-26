@@ -91,22 +91,26 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Load the initial table data
             loadRecurringExpensesTable(0);
         });
 
-        function loadRecurringExpensesTable(categorId) {
+        function loadRecurringExpensesTable(categoryId) {
             poster.on("Loading");
             $.ajax({
-                url: '@Url.Action("GetRecurringExpensesTable", "RecurringExpenses")',
+                url: '@Url.Action("GetRecurringExpensesTable", "RecurringExpenses", new { area = "BudgetManager" })',
                 type: 'POST',
-                data: { CategoryId: categorId },
+                data: { categoryId: categoryId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
                 success: function (data) {
                     $('#_RecurringExpensesTable').html(data);
-                    loadStyles();
+                    initializeComponents();
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error loading recurring expenses:', error);
+                    console.error('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
                 },
                 complete: function() {
                     poster.off();
@@ -114,18 +118,27 @@
             });
         }
 
-        function loadStyles() {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        function initializeComponents() {
+            try {
+                // Initialize tooptips
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-            $('.table input[type="checkbox"]').each(function() {
-                const td = $(this).closest('td');
-                if ($(this).is(':checked')) {
-                    td.addClass('table-success');
-                } else {
-                    // td.addClass('table-danger');
-                }
-            });
+                // Initialize checkboxes
+                $('.table input[type="checkbox"]').each(function() {
+                    const td = $(this).closest('td');
+                    if ($(this).is(':checked')) {
+                        td.addClass('table-success');
+                    }
+                });
+            } catch (error) {
+                console.error('Error in loadStyles:', error);
+            }
+        }
+
+        function editRecurringItem(recurring_item) {
+            const itemId = $(recurring_item).attr("id");
+            console.log(itemId);
         }
     </script>
 }

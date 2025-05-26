@@ -18,6 +18,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 });
 
+
 var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ??
                         builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -33,7 +34,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/Login";
         options.Cookie.Name = "SharedAuthCookie";
-
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Force HTTPS for cookies
+        options.Cookie.SameSite = SameSiteMode.Strict;           // Strict SameSite policy
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
         options.SlidingExpiration = true;
     });
@@ -54,6 +57,18 @@ if (!app.Environment.IsDevelopment())
 app.UseForwardedHeaders();
 
 app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains;");
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    await next();
+});
+
+
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();

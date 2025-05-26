@@ -36,17 +36,21 @@ namespace home_manager.Areas.BudgetManager.Controllers
         [Authorize]
         public async Task<IActionResult> GetRecurringExpensesTable(int categoryId)
         {
-            var model = new RecurringItems_VModel();
-
-            if (string.IsNullOrEmpty(_connectionString))
+            try
             {
-                // Handle the case where the connection string is null or empty
-                return BadRequest("Database connection string is not configured.");
+                var model = new RecurringItems_VModel();
+
+                if (string.IsNullOrEmpty(_connectionString))
+                {
+                    return BadRequest("Database connection string is not configured.");
+                }
+
+                await model.LoadRecurringItemsAsync(_connectionString, categoryId);
+                return PartialView("_RecurringExpensesTable", model);
+            } catch (Exception ex)
+            {
+                return BadRequest($"Error loading recurring expenses: {ex.Message}");
             }
-
-            await model.LoadRecurringItemsAsync(_connectionString, categoryId);
-
-            return PartialView("_RecurringExpensesTable", model);
         }
     }
 }
