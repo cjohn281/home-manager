@@ -26,6 +26,13 @@
         .table td, .table th {
             padding: 0.5rem 0.25rem;
         }
+
+    #filter-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        width: auto;
+    }
 </style>
 
 <div class="modal fade" id="ModifyModal" role="dialog" aria-hidden="True">
@@ -42,16 +49,27 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="categoryFilter" class="form-label">Filter by Category</label>
-                        <select id="categoryFilter" class="form-select" onchange="loadRecurringExpensesTable(this.value)">
-                            <option value="0">All Categories</option>
-                            @foreach (var category in Model.Items)
-                            {
-                                <option value="@category.CategoryId">@category.CategoryName</option>
-                            }
-                        </select>
+                <div class="col-md-12">
+                    <div class="form-group" id="filter-container">
+                        <div class="col-md-3">
+                            <label for="categoryFilter" class="form-label">Filter by Category</label>
+                            <select id="categoryFilter" class="form-select" onchange="loadRecurringExpensesTable(this.value)">
+                                <option value="0">All Categories</option>
+                                @foreach (var category in Model.Items)
+                                {
+                                    <option value="@category.CategoryId">@category.CategoryName</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <button type="button" id="" class="btn btn-outline-danger" style="border: none; margin-right:8px;" onclick="editRecurringItem(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                                </svg>
+                                <span class="visually-hidden">Button</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

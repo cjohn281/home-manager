@@ -35,7 +35,7 @@
 </style>
 
 <div class="modal-header">
-    <h3 class="modal-title">Edit Recurring Expense</h3>
+    <h3 class="modal-title">Add/Edit Recurring Expense</h3>
     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -53,7 +53,6 @@
         <div class="mb-3">
             <label asp-for="ModifyItem.Item.CategoryId" class="form-label">Category</label>
             <select asp-for="ModifyItem.Item.CategoryId" class="form-select">
-                <option value="0">Select Category</option>
                 @foreach (var category in Model.Categories.Items)
                 {
                     <option value="@category.CategoryId"
