@@ -7,19 +7,20 @@ namespace home_manager.Models
     public class RecurringItem
     {
         [Key, Column("rci_id")]
-        public int Id { get; set; }
+        public int Id { get; set; } = 0;
 
         [Required, Column("rci_name")]
-        public required string Name { get; set; }
+        public required string Name { get; set; } = string.Empty;
 
         [Column("rci_description")]
         public string? Description { get; set; }
 
+        [Required]
         [Column("rci_category_cat_id")]
-        public int Category_catID { get; set; }
+        public int Category_catID { get; set; } = 10;
 
         [Required, Column("rci_minimum_due")]
-        public required float MinimumDue { get; set; }
+        public required decimal MinimumDue { get; set; } = 0.0M;
 
         [Column("rci_balance")]
         public float? Balance { get; set; }
@@ -28,7 +29,7 @@ namespace home_manager.Models
         public float? InterestRate { get; set; }
 
         [Required, Column("rci_day")]
-        public required int Day { get; set; }
+        public required int Day { get; set; } = 1;
 
         [Column("rci_jan")]
         public Boolean? Jan { get; set; }

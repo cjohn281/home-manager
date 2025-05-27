@@ -1,0 +1,322 @@
+﻿@using home_manager.Areas.BudgetManager.ViewModels
+@using home_manager.Helpers
+@model ModifyItemCombinedViewModel
+
+<style>
+    /* Remove spinner controls from number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    #month-checkbox-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .form-check {
+        margin: 0;
+        padding: 5px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--bs-success);
+        border-color: var(--bs-success);
+    }
+</style>
+
+<div class="modal-header">
+    <h3 class="modal-title">Edit Recurring Expense</h3>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form id="modifyItemForm">
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.Name" class="form-label">Name</label>
+            <input asp-for="ModifyItem.Item.Name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.Description" class="form-label">Description (Optional)</label>
+            <textarea asp-for="ModifyItem.Item.Description" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.CategoryId" class="form-label">Category</label>
+            <select asp-for="ModifyItem.Item.CategoryId" class="form-select">
+                <option value="0">Select Category</option>
+                @foreach (var category in Model.Categories.Items)
+                {
+                    <option value="@category.CategoryId"
+                            selected="@(category.CategoryId == Model.ModifyItem.Item.CategoryId)">
+                        @category.CategoryName
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.MinimumDue" class="form-label">Minimum Due</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input asp-for="ModifyItem.Item.MinimumDue"
+                          class="form-control" 
+                          type="number" 
+                          min="0"
+                          placeholder="0.00"
+                          value="@(Model.ModifyItem.Item.MinimumDue.ToString("F2"))" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.Balance" class="form-label">Balance</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input asp-for="ModifyItem.Item.Balance"
+                          class="form-control" 
+                          type="number" 
+                          min="0"
+                          placeholder="0.00"
+                          value="@(Model.ModifyItem.Item.Balance?.ToString("F2") ?? "0.00")" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.InterestRate" class="form-label">Interest Rate</label>
+            <div class="input-group">
+                <span class="input-group-text">%</span>
+                <input asp-for="ModifyItem.Item.InterestRate"
+                       class="form-control"
+                       type="number"
+                       min="0"
+                       placeholder="00.00"
+                       value="@((Model.ModifyItem.Item.InterestRate.HasValue ? Model.ModifyItem.Item.InterestRate.Value * 100 : 0).ToString("F2"))" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModifyItem.Item.DayOfMonth" class="form-label">Day Due</label>
+            <select asp-for="ModifyItem.Item.DayOfMonth" class="form-select">
+                @for (int i = 1; i <= 31; i++)
+                {
+                    <option value="@i" selected="@(i == Model.ModifyItem.Item.DayOfMonth)">@i</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Months Due</label>
+            <div class="mb-2">
+                <input type="checkbox" id="selectAllMonths" class="form-check-input" />
+                <label class="form-check-label" for="selectAllMonths">Select All</label>
+            </div>
+            <div id="month-checkbox-container" class="mb-3">
+                <div>
+                    <label asp-for="ModifyItem.Item.January" class="form-label">January</label><br />
+                    <input asp-for="ModifyItem.Item.January" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.February" class="form-label">February</label><br />
+                    <input asp-for="ModifyItem.Item.February" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.March" class="form-label">March</label><br />
+                    <input asp-for="ModifyItem.Item.March" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.April" class="form-label">April</label><br />
+                    <input asp-for="ModifyItem.Item.April" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.May" class="form-label">May</label><br />
+                    <input asp-for="ModifyItem.Item.May" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.June" class="form-label">June</label><br />
+                    <input asp-for="ModifyItem.Item.June" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.July" class="form-label">July</label><br />
+                    <input asp-for="ModifyItem.Item.July" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.August" class="form-label">August</label><br />
+                    <input asp-for="ModifyItem.Item.August" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.September" class="form-label">September</label><br />
+                    <input asp-for="ModifyItem.Item.September" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.October" class="form-label">October</label><br />
+                    <input asp-for="ModifyItem.Item.October" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.November" class="form-label">November</label><br />
+                    <input asp-for="ModifyItem.Item.November" type="checkbox" class="form-check-input" />
+                </div>
+                <div>
+                    <label asp-for="ModifyItem.Item.December" class="form-label">December</label><br />
+                    <input asp-for="ModifyItem.Item.December" type="checkbox" class="form-check-input" />
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <input asp-for="ModifyItem.Item.PaidOff" type="checkbox" class="form-check-input" />
+            <label asp-for="ModifyItem.Item.PaidOff" class="form-label">Paid Off</label>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-danger" onclick="saveItem()">Save Changes</button>
+</div>
+
+<script>
+    // Money Input Handlers
+    // Add event listeners to format currency inputs with proper decimal places
+    document.querySelectorAll('.money-input').forEach(input => {
+        // Format number to 2 decimal places when input loses focus
+        input.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+
+        // Real-time input validation and formatting
+        input.addEventListener('input', function() {
+            // Remove any non-numeric characters except decimal point
+            // If there's already a decimal point, don't allow another
+            this.value = this.value.replace(/[^\d.]|\.(?=.*\.)/g, '');
+            
+            // Ensure only two decimal places
+            const parts = this.value.split('.');
+            if (parts[1] && parts[1].length > 2) {
+                parts[1] = parts[1].substring(0, 2);
+                this.value = parts.join('.');
+            }
+        });
+    });
+
+    // Month Selection Handlers
+    // Handle "Select All" checkbox for months
+    document.getElementById('selectAllMonths').addEventListener('change', function() {
+        const isChecked = this.checked;
+        // Update all month checkboxes to match the "Select All" state
+        document.querySelectorAll('#month-checkbox-container input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    });
+
+    /**
+     * Updates the state of the "Select All" checkbox based on individual month selections
+     * - Checked if all months are selected
+     * - Unchecked if no months are selected
+     * - Indeterminate if some months are selected
+     */
+    function updateSelectAllCheckbox() {
+        const monthCheckboxes = document.querySelectorAll('#month-checkbox-container input[type="checkbox"]');
+        const selectAllCheckbox = document.getElementById('selectAllMonths');
+        
+        // Check if all months are selected
+        const allChecked = Array.from(monthCheckboxes).every(cb => cb.checked);
+        // Check if no months are selected
+        const noneChecked = Array.from(monthCheckboxes).every(cb => !cb.checked);
+
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
+    }
+
+    // Add change event listeners to individual month checkboxes
+    document.querySelectorAll('#month-checkbox-container input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectAllCheckbox);
+    });
+
+    // Initialize select all checkbox state
+    updateSelectAllCheckbox();
+
+    document.getElementById('ModifyModal').addEventListener('hidden.bs.modal', function () {
+        // Clear the form
+        document.getElementById('modifyItemForm').reset();
+
+        // Clear the modal content
+        document.getElementById('ModifyModalContent').innerHTML = '';
+
+        // Remove any event listeners
+        document.querySelectorAll('#modifyItemForm input, #modifyItemForm select, #modifyItemForm textarea').forEach(input => {
+            input.removeEventListener('change', null);
+            input.removeEventListener('input', null);
+        });
+
+        // Clear any validation messages if present
+        const validationMessages = document.querySelectorAll('.validation-message');
+        validationMessages.forEach(message => message.remove());
+    });
+
+            function saveItem() {
+        // Get form data
+        const formData = {
+            Id: parseInt('@Model.ModifyItem.Item.Id'),
+            Name: document.querySelector('[name="ModifyItem.Item.Name"]').value.trim(),
+            Description: document.querySelector('[name="ModifyItem.Item.Description"]').value.trim(),
+            CategoryId: parseInt(document.querySelector('[name="ModifyItem.Item.CategoryId"]').value),
+            MinimumDue: parseFloat(document.querySelector('[name="ModifyItem.Item.MinimumDue"]').value) || 0,
+            Balance: parseFloat(document.querySelector('[name="ModifyItem.Item.Balance"]').value) || null,
+            InterestRate: parseFloat(document.querySelector('[name="ModifyItem.Item.InterestRate"]').value) || null,
+            DayOfMonth: parseInt(document.querySelector('[name="ModifyItem.Item.DayOfMonth"]').value),
+            January: document.querySelector('[name="ModifyItem.Item.January"]').checked,
+            February: document.querySelector('[name="ModifyItem.Item.February"]').checked,
+            March: document.querySelector('[name="ModifyItem.Item.March"]').checked,
+            April: document.querySelector('[name="ModifyItem.Item.April"]').checked,
+            May: document.querySelector('[name="ModifyItem.Item.May"]').checked,
+            June: document.querySelector('[name="ModifyItem.Item.June"]').checked,
+            July: document.querySelector('[name="ModifyItem.Item.July"]').checked,
+            August: document.querySelector('[name="ModifyItem.Item.August"]').checked,
+            September: document.querySelector('[name="ModifyItem.Item.September"]').checked,
+            October: document.querySelector('[name="ModifyItem.Item.October"]').checked,
+            November: document.querySelector('[name="ModifyItem.Item.November"]').checked,
+            December: document.querySelector('[name="ModifyItem.Item.December"]').checked,
+            PaidOff: document.querySelector('[name="ModifyItem.Item.PaidOff"]').checked
+        };
+
+        // Basic validation
+        if (!formData.Name) {
+            alert('Name is required');
+            return;
+        }
+        if (formData.CategoryId === 0) {
+            alert('Please select a category');
+            return;
+        }
+
+        poster.on("Saving");
+        $.ajax({
+            url: '@Url.Action("UpdateRecurringItem", "RecurringExpenses", new { area = "BudgetManager" })',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#ModifyModal').modal('hide');
+                    const currentCategoryId = parseInt(document.getElementById('currentCategoryId').value || 0);
+                    loadRecurringExpensesTable(currentCategoryId);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert(xhr.responseText || 'Failed to save changes. Please try again.');
+            },
+            complete: function() {
+                poster.off();
+            }
+        });
+    }
+    
+</script>

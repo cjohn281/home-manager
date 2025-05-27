@@ -28,6 +28,14 @@
         }
 </style>
 
+<div class="modal fade" id="ModifyModal" role="dialog" aria-hidden="True">
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content" id="ModifyModalContent">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+</div>
+
 <div class="container">
     <h2 class="mb-4">Recurring Expenses</h2>
 
@@ -52,6 +60,7 @@
 
     <div class="card">
         <div class="card-body">
+            <input type="hidden" id="currentCategoryId" value="0" />
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -90,41 +99,61 @@
 
 @section Scripts {
     <script>
+        // Initialize the table with all categories (categoryId = 0) when the page loads
         $(document).ready(function () {
             loadRecurringExpensesTable(0);
         });
 
+        /**
+         * Loads and updates the recurring expenses table based on selected category
+         * param {number} categoryId - The ID of the category to filter by (0 for all categories)
+         */
         function loadRecurringExpensesTable(categoryId) {
+            // Store current category selection in hidden field for state management
+            document.getElementById('currentCategoryId').value = categoryId;
+            
+            // Show loading indicator
             poster.on("Loading");
+            
+            // Request updated table content
             $.ajax({
                 url: '@Url.Action("GetRecurringExpensesTable", "RecurringExpenses", new { area = "BudgetManager" })',
                 type: 'POST',
                 data: { categoryId: categoryId },
                 headers: {
+                    // Include anti-forgery token for security
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function (data) {
+                    // Update table content with returned partial view
                     $('#_RecurringExpensesTable').html(data);
+                    // Initialize Bootstrap components and styling
                     initializeComponents();
                 },
                 error: function (xhr, status, error) {
+                    // Log detailed error information for debugging
                     console.error('Error:', error);
                     console.log('Status:', status);
                     console.log('Response:', xhr.responseText);
                 },
                 complete: function() {
+                    // Hide loading indicator regardless of success/failure
                     poster.off();
                 }
             });
         }
 
+        /**
+         * Initializes Bootstrap components and applies styling to the table
+         * Called after table content is loaded or updated
+         */
         function initializeComponents() {
             try {
-                // Initialize tooptips
+                // Initialize Bootstrap tooltips for any elements with data-bs-toggle="tooltip"
                 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
                 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-                // Initialize checkboxes
+                // Apply success styling to cells containing checked checkboxes
                 $('.table input[type="checkbox"]').each(function() {
                     const td = $(this).closest('td');
                     if ($(this).is(':checked')) {
@@ -136,9 +165,49 @@
             }
         }
 
+        /**
+         * Event handler for edit button clicks
+         * param {HTMLElement} recurring_item - The clicked element containing the item ID
+         */
         function editRecurringItem(recurring_item) {
+            // Extract item ID from the element
             const itemId = $(recurring_item).attr("id");
-            console.log(itemId);
+            loadModifyModal(itemId);
+        }
+
+        /**
+         * Loads and displays the modal for editing a recurring item
+         * param {number} itemId - The ID of the recurring item to edit
+         */
+        function loadModifyModal(itemId) {
+            // Show loading indicator
+            poster.on("Loading");
+            
+            // Request modal content
+            $.ajax({
+                url: '@Url.Action("LoadModifyModal", "RecurringExpenses", new { area = "BudgetManager" })',
+                type: 'POST',
+                data: { itemId: itemId },
+                headers: {
+                    // Include anti-forgery token for security
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    // Insert modal content and show the modal
+                    $('#ModifyModalContent').html(response);
+                    $('#ModifyModal').modal('show'); 
+                },
+                error: function (xhr, status, error) {
+                    // Log detailed error information for debugging
+                    console.error('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
+                },
+                complete: function() {
+                    // Hide loading indicator regardless of success/failure
+                    poster.off();
+                }
+            });
         }
     </script>
 }
