@@ -62,7 +62,7 @@
                             </select>
                         </div>
                         <div>
-                            <button type="button" id="" class="btn btn-outline-danger" style="border: none; margin-right:8px;" onclick="editRecurringItem(this)">
+                            <button type="button" id="add-expense-btn" class="btn btn-outline-primary" style="border: none; margin-right:8px;" onclick="editRecurringItem(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
                                     <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
                                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
@@ -83,6 +83,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th></th>
                             <th></th>
                             <th>Name</th>
                             <th>Category</th>
@@ -189,8 +190,44 @@
          */
         function editRecurringItem(recurring_item) {
             // Extract item ID from the element
-            const itemId = $(recurring_item).attr("id");
+            const itemId = $(recurring_item).attr("id").split('-')[1];
             loadModifyModal(itemId);
+        }
+
+        function deleteRecurringItem(recurring_item) {
+            const item = $(recurring_item).attr("id").split('-');
+            const itemId = item[1];
+            const itemName = item[2];
+            poster.on();
+
+            if(confirm(`Are you sure you want to delete ${itemName}?`)) {
+                $.ajax({
+                    url: '@Url.Action("DeleteRecurringItem", "RecurringExpenses", new { area = "BudgetManager" })',
+                    type: 'POST',
+                    data: { itemId: itemId },
+                    headers: {
+                        // Include anti-forgery token for security
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        // Reload the table after successful deletion
+                        loadRecurringExpensesTable(document.getElementById('currentCategoryId').value);
+                    },
+                    error: function (xhr, status, error) {
+                        // Log detailed error information for debugging
+                        console.error('Error:', error);
+                        console.log('Status:', status);
+                        console.log('Response:', xhr.responseText);
+                    },
+                    complete: function() {
+                        // Hide loading indicator regardless of success/failure
+                        poster.off();
+                    }
+                });
+            } else {
+                // User cancelled deletion, hide loading indicator
+                poster.off();
+            }
         }
 
         /**

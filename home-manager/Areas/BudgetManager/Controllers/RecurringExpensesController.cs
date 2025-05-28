@@ -183,5 +183,30 @@ namespace home_manager.Areas.BudgetManager.Controllers
                 return BadRequest($"Error updating recurring item: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> DeleteRecurringItem(int itemId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(_connectionString))
+                {
+                    return BadRequest("Database connection string is not configured.");
+                }
+                using var connection = new NpgsqlConnection(_connectionString);
+                await connection.OpenAsync();
+                await connection.ExecuteAsync("CALL spw_delete_recurring_item(@itemId)", new { itemId });
+                return Json(new { success = true });
+            }
+            catch (PostgresException pex)
+            {
+                return BadRequest($"Database error: {pex.MessageText}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error deleting recurring item: {ex.Message}");
+            }
+        }
     }
 }
