@@ -1,82 +1,90 @@
 ﻿@using home_manager.Helpers
 @model home_manager.Areas.BudgetManager.ViewModels.RecurringItems_VModel
 
-<tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td class="text-end"><strong>@FormatHelper.FormatCurrency(Model.TotalMinimumDue)</strong></td>
-    <td class="text-end"><strong>@FormatHelper.FormatCurrency(Model.TotalBalance)</strong></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-</tr>
-@foreach (var item in Model.Items)
+@if (Model.Items[0].Id == -1)
 {
     <tr>
-        <td>
-            <button type="button" id="delete-@item.Id-@item.Name" class="btn btn-outline-danger" style="border: none;" onclick="deleteRecurringItem(this)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
-                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
-                </svg>
-                <span class="visually-hidden">Button</span>
-            </button>
-        </td>
-        <td>
-            <button type="button" id="edit-@item.Id" class="btn btn-outline-primary" style="border: none;" onclick="editRecurringItem(this)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
-                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
-                </svg>
-                <span class="visually-hidden">Button</span>
-            </button>
-        </td>
-        <td>
-            @if (!string.IsNullOrEmpty(item.Description))
-            {
-                <span data-bs-toggle="tooltip" data-bs-placement="right" title="@item.Description">
-                    @item.Name
-                </span>
-            }
-            else
-            {
-                @item.Name
-            }
-        </td>
-        <td>@(item.CategoryName ?? "Uncategorized")</td>
-        <td class="text-end">@FormatHelper.FormatCurrency(item.MinimumDue)
-        </td>
-        <td class="text-end">@(item.Balance.HasValue? FormatHelper.FormatCurrency(item.Balance.Value) : "-")</td>
-        <td class="text-end">@(item.InterestRate.HasValue ? $"{(item.InterestRate * 100):F2}%" : "-")</td>
-        <td></td>
-        <td class="text-center">@item.DayOfMonth</td>
-        <td class="text-center"><input type="checkbox" disabled @(item.January ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.February ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.March ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.April ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.May ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.June ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.July ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.August ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.September ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.October ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.November ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.December ? "checked" : "")></td>
-        <td class="text-center"><input type="checkbox" disabled @(item.PaidOff ? "checked" : "")></td>
+        <td colspan="22" style="align-self:center; color:orangered;">There are no recurring items yet!</td>
     </tr>
-}
+} else {
 
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="text-end"><strong>@FormatHelper.FormatCurrency(Model.TotalMinimumDue)</strong></td>
+        <td class="text-end"><strong>@FormatHelper.FormatCurrency(Model.TotalBalance)</strong></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>
+                <button type="button" id="delete-@item.Id-@item.Name" class="btn btn-outline-danger" style="border: none;" onclick="deleteRecurringItem(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                        <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                    </svg>
+                    <span class="visually-hidden">Button</span>
+                </button>
+            </td>
+            <td>
+                <button type="button" id="edit-@item.Id" class="btn btn-outline-primary" style="border: none;" onclick="editRecurringItem(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
+                    </svg>
+                    <span class="visually-hidden">Button</span>
+                </button>
+            </td>
+            <td>
+                @if (!string.IsNullOrEmpty(item.Description))
+                {
+                    <span data-bs-toggle="tooltip" data-bs-placement="right" title="@item.Description">
+                        @item.Name
+                    </span>
+                }
+                else
+                {
+                    @item.Name
+                }
+            </td>
+            <td>@(item.CategoryName ?? "Uncategorized")</td>
+            <td class="text-end">@FormatHelper.FormatCurrency(item.MinimumDue)
+            </td>
+            <td class="text-end">@(item.Balance.HasValue? FormatHelper.FormatCurrency(item.Balance.Value) : "-")</td>
+            <td class="text-end">@(item.InterestRate.HasValue ? $"{(item.InterestRate * 100):F2}%" : "-")</td>
+            <td></td>
+            <td class="text-center">@item.DayOfMonth</td>
+            <td class="text-center"><input type="checkbox" disabled @(item.January ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.February ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.March ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.April ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.May ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.June ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.July ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.August ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.September ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.October ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.November ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.December ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.PaidOff ? "checked" : "")></td>
+        </tr>
+    }
+
+}

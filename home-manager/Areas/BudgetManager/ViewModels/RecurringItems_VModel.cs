@@ -25,28 +25,28 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         public class RecurringItem
         {
             [Required]
-            public int Id { get; set; }
+            public int Id { get; set; } = -1;
 
             [Required]
             public string Name { get; set; } = String.Empty;
 
-            public string? Description { get; set; }
+            public string? Description { get; set; } = null;
 
             [Required]
-            public int CategoryId { get; set; }
+            public int CategoryId { get; set; } = 10;
 
             [Required]
             public string CategoryName { get; set; } = String.Empty;
 
             [Required]
-            public decimal MinimumDue { get; set; }
+            public decimal MinimumDue { get; set; } = 0.0M;
 
-            public decimal? Balance { get; set; }
+            public decimal? Balance { get; set; } = null;
 
-            public decimal? InterestRate { get; set; }
+            public decimal? InterestRate { get; set; } = null;
 
             [Required]
-            public int DayOfMonth { get; set; }
+            public int DayOfMonth { get; set; } = DateTime.Now.Day;
 
             [Required]
             public bool January { get; set; } = false;
@@ -99,9 +99,18 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         {
             using var connection = new NpgsqlConnection(connectionString);
             await connection.OpenAsync();
-            Items = (await connection.QueryAsync<RecurringItem>(
+            var items = (await connection.QueryAsync<RecurringItem>(
                 $"SELECT * FROM fnc_get_recurring_items({categoryId});"
-            )).ToList();
+            ))?.ToList();
+
+            if (items == null || items.Count == 0)
+            {
+                Items = new List<RecurringItem> { new RecurringItem() };
+            }
+            else
+            {
+                Items = items;
+            }
 
             TotalMinimumDue = Items.Sum(item => item.MinimumDue);
             TotalBalance = Items.Sum(item => item.Balance ?? 0);

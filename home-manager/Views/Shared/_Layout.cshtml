@@ -23,8 +23,14 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="RecurringExpenses" asp-action="Index">Recurring Expenses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="IncidentalExpenses" asp-action="Index">Incidentals</a>
+                        </li>
+                        <li class="nav-item">
                             <form asp-area="" asp-controller="Account" asp-action="Logout" asp-antiforgery="true" method="post" style="padding: 0;">
-                                <button type="submit" class="nav-link text-dark btn btn-link" style="background:none; border:none; padding: 0.5rem 0;">Logout</button>
+                                <button type="submit" class="nav-link text-dark btn btn-link" style="background:none; border:none; padding: 0.5rem 0.5rem;">Logout</button>
                             </form>
                         </li>
                     </ul>

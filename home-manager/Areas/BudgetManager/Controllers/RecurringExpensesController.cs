@@ -59,6 +59,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// </returns>
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetRecurringExpensesTable(int categoryId)
         {
             try
@@ -89,6 +90,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// </returns>
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoadModifyModal(int itemId)
         {
             if (string.IsNullOrEmpty(_connectionString))
@@ -121,6 +123,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// </remarks>
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateRecurringItem([FromBody] ModifyItem_VModel.RecItem item)
         {
             try
@@ -186,6 +189,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteRecurringItem(int itemId)
         {
             try

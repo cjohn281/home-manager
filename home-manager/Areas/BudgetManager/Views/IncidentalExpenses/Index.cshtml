@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "Incidental Expenses";
+}
+
+<style>
+    .container {
+        max-width: 95vw !important;
+        margin: 0 auto;
+        padding: 0 10px;
+    }
+
+    .card {
+        width: 100%;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1rem 0.5rem;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+        .table td, .table th {
+            padding: 0.5rem 0.25rem;
+        }
+
+    #filter-container {
+        display: flex;
+        justify-content: start;
+        align-items: end;
+        width: auto;
+    }
+</style>
+
+<div class="container">
+    <h2 class="mb-4">Incidental Expenses</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group" id="filter-container">
+                        <div class="col-md-3">
+                            <label for="monthFilter" class="form-label">Month</label>
+                            <select id="monthFilter" class="form-select" onchange="">
+                                <option value="0">January</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 ms-2">
+                            <label for="yearFilter" class="form-label">Year</label>
+                            <select id="yearFilter" class="form-select" onchange="">
+                                <option value="0">2025</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="button" id="add-expense-btn" class="btn btn-outline-primary" style="border: none;" onclick="">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <input type="hidden" id="currentCategoryId" value="0" />
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Expense</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="_IncidentalExpensesTable">
+                        <!-- Incidentals Expenses Table content will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    
+        $(document).ready(function () {
+            loadIncidentalExpensesTable();
+        });
+
+        function loadIncidentalExpensesTable() {
+            poster.on()
+
+            $.ajax({
+                url: '@Url.Action("GetIncidentalExpensesTable", "IncidentalExpenses", new { area = "BudgetManager" })',
+                type: 'POST',
+                headers: {
+                    // Include anti-forgery token for security
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(data) {
+                    $('#_IncidentalExpensesTable').html(data);
+                },
+                error: function (xhr, status, error) {
+                    // Log detailed error information for debugging
+                    console.error('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
+                },
+                complete: function() {
+                    // Hide loading indicator regardless of success/failure
+                    poster.off();
+                }
+            });
+        }
+
+    </script>
+}
