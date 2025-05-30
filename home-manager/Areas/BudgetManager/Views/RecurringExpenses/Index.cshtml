@@ -191,7 +191,12 @@
         function editRecurringItem(recurring_item) {
             // Extract item ID from the element
             const itemId = $(recurring_item).attr("id").split('-')[1];
-            loadModifyModal(itemId);
+            console.log(itemId);
+            if(isNumeric(itemId)){
+                loadModifyModal(itemId);
+            } else {
+                loadModifyModal(0)
+            }
         }
 
         function deleteRecurringItem(recurring_item) {
@@ -264,5 +269,12 @@
                 }
             });
         }
+
+        function isNumeric(value) {
+          // First, ensure that we're working with a type that can be parsed as a number.
+          // (Note: An empty string or a string with just spaces should not count as a number.)
+          return !isNaN(value) && !isNaN(parseFloat(value));
+        }
+
     </script>
 }

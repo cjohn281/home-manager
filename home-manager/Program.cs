@@ -25,6 +25,8 @@ var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__De
 builder.Services.AddDbContext<DataProtectionContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddScoped<DbConnectionService>();
+
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<DataProtectionContext>()
     .SetApplicationName("HomeManager");

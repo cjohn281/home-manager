@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using home_manager.Data;
 using home_manager.Models;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +13,7 @@ namespace home_manager.Areas.BudgetManager.ViewModels
     /// </summary>
     public class RecurringItems_VModel
     {
-        private readonly CultureInfo _cultureInfo = new("en-US");
+        private readonly DbConnectionService _dbConnection;
 
         public List<RecurringItem> Items { get; set; } = new();
 
@@ -21,6 +22,11 @@ namespace home_manager.Areas.BudgetManager.ViewModels
 
         [Required]
         public decimal TotalBalance { get; private set; } = 0.0M;
+
+        public RecurringItems_VModel(DbConnectionService dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
 
         public class RecurringItem
         {
@@ -92,15 +98,14 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         /// Loads recurring items from the database based on the specified category.
         /// Also calculates total minimum due and total balance.
         /// </summary>
-        /// <param name="connectionString">The database connection string.</param>
         /// <param name="categoryId">The category ID to filter by. Use 0 for all categories.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task LoadRecurringItemsAsync(string connectionString, int categoryId)
+        public async Task LoadRecurringItemsAsync(int categoryId)
         {
-            using var connection = new NpgsqlConnection(connectionString);
+            using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
             await connection.OpenAsync();
             var items = (await connection.QueryAsync<RecurringItem>(
-                $"SELECT * FROM fnc_get_recurring_items({categoryId});"
+                "SELECT * FROM fnc_get_recurring_items_by_category(@categoryId)", new { categoryId }
             ))?.ToList();
 
             if (items == null || items.Count == 0)
@@ -122,6 +127,12 @@ namespace home_manager.Areas.BudgetManager.ViewModels
     /// </summary>
     public class RecurringCategoryFilterItems_VModel
     {
+        private readonly DbConnectionService _dbConnection;
+
+        public RecurringCategoryFilterItems_VModel(DbConnectionService dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
         /// <summary>
         /// Gets or sets the list of available recurring expense categories.
         /// </summary>
@@ -148,11 +159,10 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         /// <summary>
         /// Loads all available recurring expense categories from the database.
         /// </summary>
-        /// <param name="connectionString">The database connection string.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task LoadRecurringCategoryFilterItems(string connectionString)
+        public async Task LoadRecurringCategoryFilterItems()
         {
-            using var connection = new NpgsqlConnection(connectionString);
+            using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
             await connection.OpenAsync();
             Items = (await connection.QueryAsync<RecurringCategory>(
                 "SELECT * FROM fnc_get_recurring_category_filter_items();"
@@ -165,6 +175,13 @@ namespace home_manager.Areas.BudgetManager.ViewModels
     /// </summary>
     public class ModifyItem_VModel
     {
+        private readonly DbConnectionService _dbConnection;
+
+        public ModifyItem_VModel(DbConnectionService dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
         /// <summary>
         /// Gets or sets the recurring item being modified.
         /// </summary>
@@ -173,39 +190,14 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         /// <summary>
         /// Loads a specific recurring item from the database for modification.
         /// </summary>
-        /// <param name="connectionString">The database connection string.</param>
         /// <param name="itemId">The ID of the item to load.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task LoadItem(string connectionString, int itemId)
+        public async Task LoadItem(int itemId)
         {
-            using var connection = new NpgsqlConnection(connectionString);
+            using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
             await connection.OpenAsync();
             var item = await connection.QueryFirstOrDefaultAsync<RecItem>(
-                @"SELECT 
-                    rci_id AS Id,
-                    rci_name AS Name,
-                    rci_description AS Description,
-                    rci_category_cat_id AS CategoryId,
-                    rci_minimum_due AS MinimumDue,
-                    rci_balance AS Balance,
-                    rci_interest_rate AS InterestRate,
-                    rci_day AS DayOfMonth,
-                    COALESCE(rci_jan, false) AS January,
-                    COALESCE(rci_feb, false) AS February,
-                    COALESCE(rci_mar, false) AS March,
-                    COALESCE(rci_apr, false) AS April,
-                    COALESCE(rci_may, false) AS May,
-                    COALESCE(rci_jun, false) AS June,
-                    COALESCE(rci_jul, false) AS July,
-                    COALESCE(rci_aug, false) AS August,
-                    COALESCE(rci_sep, false) AS September,
-                    COALESCE(rci_oct, false) AS October,
-                    COALESCE(rci_nov, false) AS November,
-                    COALESCE(rci_dec, false) AS December,
-                    COALESCE(rci_paid_off, false) AS PaidOff
-                FROM tbl_recurring_item
-                WHERE rci_id = @itemId;",
-                new { itemId }
+                "SELECT * FROM fnc_get_recurring_item_by_id(@itemId)", new { itemId }
             );
 
             if (item != null)
@@ -240,20 +232,22 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         }
     }
 
-    /// <summary>
-    /// Combined view model for the modify modal, containing both the item being modified
-    /// and the available categories for selection.
-    /// </summary>
+
+    // Update the initialization of ModifyItem property in ModifyItemCombinedViewModel to pass the required parameter.
+
     public class ModifyItemCombinedViewModel
     {
-        /// <summary>
-        /// Gets or sets the recurring item being modified.
-        /// </summary>
-        public ModifyItem_VModel ModifyItem { get; set; } = new();
+        private readonly DbConnectionService _dbConnection;
 
-        /// <summary>
-        /// Gets or sets the available categories for selection.
-        /// </summary>
-        public RecurringCategoryFilterItems_VModel Categories { get; set; } = new();
+        public ModifyItemCombinedViewModel(DbConnectionService dbConnection)
+        {
+            _dbConnection = dbConnection;
+            ModifyItem = new ModifyItem_VModel(_dbConnection);
+            Categories = new RecurringCategoryFilterItems_VModel(_dbConnection);
+        }
+
+        public ModifyItem_VModel ModifyItem { get; set; }
+
+        public RecurringCategoryFilterItems_VModel Categories { get; set; }
     }
 }

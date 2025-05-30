@@ -1,9 +1,12 @@
 ﻿using Dapper;
 using home_manager.Areas.BudgetManager.ViewModels;
+using home_manager.Data;
 using home_manager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using System.Data.Common;
+using System.Diagnostics;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
@@ -15,17 +18,15 @@ namespace home_manager.Areas.BudgetManager.Controllers
     [Authorize]
     public class RecurringExpensesController : Controller
     {
-        private readonly IConfiguration _configuration;
-        private readonly string _connectionString;
+        private readonly DbConnectionService _dbConnection;
 
         /// <summary>
         /// Initializes a new instance of the RecurringExpensesController.
         /// </summary>
         /// <param name="configuration">The application configuration containing connection strings.</param>
-        public RecurringExpensesController(IConfiguration configuration)
+        public RecurringExpensesController(DbConnectionService dbConnection)
         {
-            _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+            _dbConnection = dbConnection;
         }
 
         /// <summary>
@@ -38,14 +39,13 @@ namespace home_manager.Areas.BudgetManager.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
         {
-            var model = new RecurringCategoryFilterItems_VModel();
-
-            if (string.IsNullOrEmpty(_connectionString))
+            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
             {
                 return BadRequest("Database connection string is not configured.");
             }
 
-            await model.LoadRecurringCategoryFilterItems(_connectionString);
+            var model = new RecurringCategoryFilterItems_VModel(_dbConnection); // Pass the required 'dbConnection' parameter
+            await model.LoadRecurringCategoryFilterItems();
             return View(model);
         }
 
@@ -64,14 +64,14 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             try
             {
-                var model = new RecurringItems_VModel();
+                var model = new RecurringItems_VModel(_dbConnection);
 
-                if (string.IsNullOrEmpty(_connectionString))
+                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
                 {
                     return BadRequest("Database connection string is not configured.");
                 }
 
-                await model.LoadRecurringItemsAsync(_connectionString, categoryId);
+                await model.LoadRecurringItemsAsync(categoryId);
                 return PartialView("_RecurringExpensesTable", model);
             }
             catch (Exception ex)
@@ -93,18 +93,19 @@ namespace home_manager.Areas.BudgetManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoadModifyModal(int itemId)
         {
-            if (string.IsNullOrEmpty(_connectionString))
+            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
             {
                 return BadRequest("Database connection string is not configured.");
             }
 
-            var model = new ModifyItemCombinedViewModel
+            var model = new ModifyItemCombinedViewModel(_dbConnection)
             {
-                ModifyItem = new ModifyItem_VModel { Item = new ModifyItem_VModel.RecItem() },
-                Categories = new RecurringCategoryFilterItems_VModel()
+                ModifyItem = new ModifyItem_VModel(_dbConnection) { Item = new ModifyItem_VModel.RecItem() },
+                Categories = new RecurringCategoryFilterItems_VModel(_dbConnection)
             };
-            await model.ModifyItem.LoadItem(_connectionString, itemId);
-            await model.Categories.LoadRecurringCategoryFilterItems(_connectionString);
+            Debug.WriteLine($"Item ID: {itemId}");
+            await model.ModifyItem.LoadItem(itemId);
+            await model.Categories.LoadRecurringCategoryFilterItems();
 
             return PartialView("_ModifyModal", model);
         }
@@ -128,7 +129,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(_connectionString))
+                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
                 {
                     return BadRequest("Database connection string is not configured.");
                 }
@@ -143,7 +144,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
                 if (item.MinimumDue < 0)
                     return BadRequest("Minimum Due cannot be negative");
 
-                using var connection = new NpgsqlConnection(_connectionString);
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
                 await connection.OpenAsync();
 
                 await connection.ExecuteAsync(
@@ -194,11 +195,11 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(_connectionString))
+                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
                 {
                     return BadRequest("Database connection string is not configured.");
                 }
-                using var connection = new NpgsqlConnection(_connectionString);
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
                 await connection.OpenAsync();
                 await connection.ExecuteAsync("CALL spw_delete_recurring_item(@itemId)", new { itemId });
                 return Json(new { success = true });
