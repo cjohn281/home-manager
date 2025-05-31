@@ -13,15 +13,21 @@ namespace home_manager.Areas.BudgetManager.ViewModels
 
         private readonly DbConnectionService _dbConnection;
 
+
         public List<IncidentalItem> Items { get; set; } = new();
+        public List<DynamicCategoryOption> DynamicCategoryOptions { get; set; } = new();
+        public List<DynamicTransactionOption> DynamicTransactionOptions { get; set; } = new();
+
 
         [Required]
         public decimal TotalAmount { get; private set; } = 0.0M;
+
 
         public IncidentalItems_VModel(DbConnectionService dbConnection)
         {
             _dbConnection = dbConnection;
         }
+
 
         public class IncidentalItem
         {
@@ -47,7 +53,14 @@ namespace home_manager.Areas.BudgetManager.ViewModels
 
             [Required]
             public string CategoryName { get; set; } = String.Empty;
+
+            [Required]
+            public int TransactionId { get; set; } = -1;
+
+            [Required]
+            public string TransactionDescription { get; set; } = String.Empty;
         }
+
 
         public async Task LoadIncidentalItemsAsync(int month, int year)
         {
@@ -68,19 +81,7 @@ namespace home_manager.Areas.BudgetManager.ViewModels
                 TotalAmount = Items.Sum(item => item.Amount);
             }
         }
-    }
 
-    public class IncidentalDynamicRow_VModel
-    {
-        private readonly DbConnectionService _dbConnection;
-
-        public List<DynamicCategoryOption> DynamicCategoryOptions { get; set; } = new();
-        public List<DynamicTransactionOption> DynamicTransactionOptions { get; set; } = new();
-
-        public IncidentalDynamicRow_VModel(DbConnectionService dbConnection)
-        {
-            _dbConnection = dbConnection;
-        }
 
         public class DynamicCategoryOption
         {
@@ -90,8 +91,9 @@ namespace home_manager.Areas.BudgetManager.ViewModels
 
             public string Description { get; set; } = String.Empty;
 
-            
+
         }
+
 
         public class DynamicTransactionOption
         {

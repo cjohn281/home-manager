@@ -43,22 +43,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
             }
 
             await model.LoadIncidentalItemsAsync(month, year);
-            return PartialView("_IncidentalExpensesTable", model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetIncidentalExpensesDynamicRow()
-        {
-            var model = new IncidentalDynamicRow_VModel(_dbConnection);
-
-            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-            {
-                return BadRequest("Database connection string is not configured.");
-            }
-
             await model.GetDynamicOptions();
-            return PartialView("_IncidentalExpensesDynamicRow", model);
+            return PartialView("_IncidentalExpensesTable", model);
         }
     }
 }
