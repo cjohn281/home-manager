@@ -36,7 +36,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// Returns the index view with category filter options.
         /// Returns BadRequest if the database connection string is not configured.
         /// </returns>
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
@@ -58,7 +57,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// Returns BadRequest if an error occurs or if the connection string is not configured.
         /// </returns>
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetRecurringExpensesTable(int categoryId)
         {
@@ -89,7 +87,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// Returns BadRequest if the connection string is not configured.
         /// </returns>
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoadModifyModal(int itemId)
         {
@@ -123,7 +120,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// InterestRate is converted from percentage to decimal format before storage.
         /// </remarks>
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateRecurringItem([FromBody] ModifyItem_VModel.RecItem item)
         {
@@ -189,7 +185,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteRecurringItem(int itemId)
         {

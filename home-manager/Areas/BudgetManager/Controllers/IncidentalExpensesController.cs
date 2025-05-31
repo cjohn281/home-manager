@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using home_manager.Areas.BudgetManager.ViewModels;
+using home_manager.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace home_manager.Areas.BudgetManager.Controllers
@@ -7,29 +9,41 @@ namespace home_manager.Areas.BudgetManager.Controllers
     [Authorize]
     public class IncidentalExpensesController : Controller
     {
-        private readonly IConfiguration _configuration;
-        private readonly string _connectionString;
+        private readonly DbConnectionService _dbConnection;
 
-        public IncidentalExpensesController(IConfiguration configuration)
+        public IncidentalExpensesController(DbConnectionService dbConnection)
         {
-            _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+            _dbConnection = dbConnection;
         }
 
 
-        [Authorize]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var model = new AvailableLedgerDropdown_VModel(_dbConnection);
+
+            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
+            {
+                return BadRequest("Database connection string is not configured.");
+            }
+
+            await model.LoadAvailableLedgerDropdowns();
+            return View(model);
         }
+
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetIncidentalExpensesTable()
+        public async Task<IActionResult> GetIncidentalExpensesTable(int month, int year)
         {
+            var model = new IncidentalItems_VModel(_dbConnection);
 
-            return View();
+            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
+            {
+                return BadRequest("Database connection string is not configured.");
+            }
+
+            await model.LoadIncidentalItemsAsync(month, year);
+            return PartialView("_IncidentalExpensesTable", model);
         }
     }
 }

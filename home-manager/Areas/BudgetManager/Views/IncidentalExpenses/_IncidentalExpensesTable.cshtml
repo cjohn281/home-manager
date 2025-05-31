@@ -1,0 +1,30 @@
+﻿@using home_manager.Helpers;
+@model home_manager.Areas.BudgetManager.ViewModels.IncidentalItems_VModel;
+
+@if (Model.Items[0].Id == -1)
+{
+    <tr>
+        <td colspan="7" style="align-self:center; color:orangered;">There are no incidental items yet!</td>
+    </tr>
+} else {
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><strong>@FormatHelper.FormatCurrency(Model.TotalAmount)</strong></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        @foreach (var item in Model.Items)
+        {
+            <td></td>
+            <td>@item.DateIncurred.ToShortDateString()</td> //date
+            <td>@item.Name</td> //expense
+            <td>@FormatHelper.FormatCurrency(item.Amount)</td> //amount
+            <td>@item.Description</td> //description
+            <td>@item.CategoryName</td> //category name
+        }
+    </tr>
+}
