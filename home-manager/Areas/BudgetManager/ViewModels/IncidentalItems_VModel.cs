@@ -4,6 +4,7 @@ using home_manager.Models;
 using Npgsql;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using static home_manager.Helpers.DropdownHelper;
 
 namespace home_manager.Areas.BudgetManager.ViewModels
 {
@@ -67,6 +68,67 @@ namespace home_manager.Areas.BudgetManager.ViewModels
                 TotalAmount = Items.Sum(item => item.Amount);
             }
         }
+    }
 
+    public class IncidentalDynamicRow_VModel
+    {
+        private readonly DbConnectionService _dbConnection;
+
+        public List<DynamicCategoryOption> DynamicCategoryOptions { get; set; } = new();
+        public List<DynamicTransactionOption> DynamicTransactionOptions { get; set; } = new();
+
+        public IncidentalDynamicRow_VModel(DbConnectionService dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
+        public class DynamicCategoryOption
+        {
+            public int Id { get; set; } = -1;
+
+            public int TransactionId { get; set; } = -1;
+
+            public string Description { get; set; } = String.Empty;
+
+            
+        }
+
+        public class DynamicTransactionOption
+        {
+            public int Id { get; set; } = -1;
+
+            public string Description { get; set; } = String.Empty;
+        }
+
+        public async Task GetDynamicOptions()
+        {
+            using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+            await connection.OpenAsync();
+            var categories = (await connection.QueryAsync<DynamicCategoryOption>(
+                "SELECT * FROM fnc_get_incidental_categories()", new { }
+            ))?.ToList();
+
+            var transactions = (await connection.QueryAsync<DynamicTransactionOption>(
+                "SELECT * FROM fnc_get_incidental_transaction_types()", new { }
+            )).ToList();
+
+            if (categories == null || categories.Count == 0)
+            {
+                DynamicCategoryOptions = new List<DynamicCategoryOption> { new DynamicCategoryOption() };
+            }
+            else
+            {
+                DynamicCategoryOptions = categories;
+            }
+
+            if (transactions == null || transactions.Count == 0)
+            {
+                DynamicTransactionOptions = new List<DynamicTransactionOption> { new DynamicTransactionOption() };
+            }
+            else
+            {
+                DynamicTransactionOptions = transactions;
+            }
+        }
     }
 }

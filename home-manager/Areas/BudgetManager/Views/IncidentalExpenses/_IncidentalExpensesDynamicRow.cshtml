@@ -1,0 +1,25 @@
+﻿@model home_manager.Areas.BudgetManager.ViewModels.IncidentalDynamicRow_VModel
+
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+    <label for="transactionDropdown" class="form-label"></label>
+    <select id="transactionDropdown" class="form-select" onchange="">
+        @foreach (var transaction in Model.DynamicTransactionOptions)
+        {
+            <option value="@transaction.Id">@transaction.Description</option>
+        }
+    </select>
+</td>
+<td>
+    <label for="categoryDropdown" class="form-label"></label>
+    <select id="categoryDropdown" class="form-select" onchange="">
+        @foreach (var category in Model.DynamicCategoryOptions)
+        {
+            <option value="@category.Id">@category.Description</option>
+        }
+    </select>
+</td>
+<td></td>
