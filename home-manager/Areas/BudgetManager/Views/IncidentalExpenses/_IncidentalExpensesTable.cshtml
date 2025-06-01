@@ -97,5 +97,42 @@
 }
 
 <script>
-    
+    $(document).ready(function() {
+        updateCategoryDropdown();
+
+        $('#transactionDropdown').change(function() {
+            updateCategoryDropdown();
+        })
+    });
+
+    function updateCategoryDropdown() {
+        const transactionId = $('#transactionDropdown').val();
+        const categoryDropdown = $('#categoryDropdown');
+
+        categoryDropdown.prop('disabled', true);
+
+        $.ajax({
+            url: '@Url.Action("GetCategoriesByTransaction", "IncidentalExpenses", new { area = "BudgetManager"})',
+            type: 'GET',
+            data: { transactionId: transactionId},
+            success: function(data) {
+                categoryDropdown.empty();
+
+                $.each(data, function(index, category) {
+                    categoryDropdown.append(
+                        $('<option></option>')
+                            .val(category.id)
+                            .text(category.description)
+                    );
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading categories:', error);
+                categoryDropdown.html('<option value="">Error loading categories</option>');
+            },
+            complete: function() {
+                categoryDropdown.prop('disabled', false);
+            }
+        });
+    }
 </script>
