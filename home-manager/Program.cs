@@ -1,4 +1,5 @@
 using DotNetEnv;
+using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -32,6 +33,7 @@ builder.Services.AddDbContext<DataProtectionContext>(options =>
 
 
 builder.Services.AddScoped<DbConnectionService>();
+builder.Services.AddScoped<IBudgetManagerRepository, BudgetManagerRepository>();
 
 
 builder.Services.AddDataProtection()

@@ -14,14 +14,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("inc_date_created")]
         public DateTime DateCreated { get; set; }
-
-        [Column("inc_created_by_prn_id")]
-        public int CreatedBy_prnId { get; set; }
-
-        [Column("inc_date_modified")]
-        public DateTime DateModified { get; set; }
-
-        [Column("inc_modified_by_prn_id")]
-        public int ModifiedBy_prnID { get; set; }
     }
 }

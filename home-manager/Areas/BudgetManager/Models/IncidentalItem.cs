@@ -6,37 +6,28 @@ namespace home_manager.Areas.BudgetManager.Models
     [Table("tbl_incidental_item")]
     public class IncidentalItem
     {
-        [Key, Column("ici_id")]
-        public int Id { get; set; }
+        [Column("ici_id")]
+        public int Id { get; set; } = 0;
 
         [Column("ici_incidental_inc_id")]
-        public int Incidental_incID { get; set; }
+        public int Incidental_incID { get; set; } = 0;
 
-        [Required, Column("ici_name")]
-        public required string Name { get; set; }
+        [Column("ici_name")]
+        public string Name { get; set; } = String.Empty;
 
         [Column("ici_description")]
-        public string? Description { get; set; }
+        public string Description { get; set; } = String.Empty;
 
-        [Required, Column("ici_date")]
-        public required DateOnly Date { get; set; }
+        [Column("ici_date")]
+        public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
-        [Required, Column("ici_amount")]
-        public float Amount { get; set; }
+        [Column("ici_amount")]
+        public decimal Amount { get; set; } = 0.0M;
 
-        [Required, Column("ici_category_cat_id")]
-        public required int Category_catID { get; set; }
+        [Column("ici_category_cat_id")]
+        public int Category_catID { get; set; } = 0;
 
         [Column("ici_date_created")]
-        public DateTime DateCreated { get; set; }
-
-        [Column("ici_created_by_prn_id")]
-        public int CreatedBy_prnID { get; set; }
-
-        [Column("ici_date_modified")]
-        public DateTime DateModified { get; set; }
-
-        [Column("ici_modified_by_prn_id")]
-        public int ModifiedBy_prnID { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
     }
 }

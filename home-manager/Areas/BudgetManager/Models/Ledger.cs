@@ -17,14 +17,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("ldg_date_created")]
         public DateTime DateCreated { get; set; }
-
-        [Column("ldg_created_by_prn_id")]
-        public int CreatedBy_prnId { get; set; }
-
-        [Column("ldg_date_modified")]
-        public DateTime DateModified { get; set; }
-
-        [Column("ldg_modified_by_prn_id")]
-        public int ModifiedBy_prnID { get; set; }
     }
 }
