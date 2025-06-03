@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace home_manager.Models
+namespace home_manager.Areas.BudgetManager.Models
 {
     [Table("tbl_recurring_item")]
     public class RecurringItem
@@ -32,43 +32,43 @@ namespace home_manager.Models
         public required int Day { get; set; } = 1;
 
         [Column("rci_jan")]
-        public Boolean? Jan { get; set; }
+        public bool? Jan { get; set; }
 
         [Column("rci_feb")]
-        public Boolean? Feb { get; set; }
+        public bool? Feb { get; set; }
 
         [Column("rci_mar")]
-        public Boolean? Mar { get; set; }
+        public bool? Mar { get; set; }
 
         [Column("rci_apr")]
-        public Boolean? Apr { get; set; }
+        public bool? Apr { get; set; }
 
         [Column("rci_may")]
-        public Boolean? May { get; set; }
+        public bool? May { get; set; }
 
         [Column("rci_jun")]
-        public Boolean? Jun { get; set; }
+        public bool? Jun { get; set; }
 
         [Column("rci_jul")]
-        public Boolean? Jul { get; set; }
+        public bool? Jul { get; set; }
 
         [Column("rci_aug")]
-        public Boolean? Aug { get; set; }
+        public bool? Aug { get; set; }
 
         [Column("rci_sep")]
-        public Boolean? Sep { get; set; }
+        public bool? Sep { get; set; }
 
         [Column("rci_oct")]
-        public Boolean? Oct { get; set; }
+        public bool? Oct { get; set; }
 
         [Column("rci_nov")]
-        public Boolean? Nov { get; set; }
+        public bool? Nov { get; set; }
 
         [Column("rci_dec")]
-        public Boolean? Dec { get; set; }
+        public bool? Dec { get; set; }
 
         [Column("rci_paid_off")]
-        public Boolean? PaidOff { get; set; }
+        public bool? PaidOff { get; set; }
 
         [Column("rci_date_created")]
         public DateTime DateCreated { get; set; }

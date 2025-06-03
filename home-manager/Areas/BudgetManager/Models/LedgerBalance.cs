@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace home_manager.Models
+namespace home_manager.Areas.BudgetManager.Models
 {
     [Table("tbl_ledger_balance")]
     public class LedgerBalance
