@@ -58,13 +58,13 @@
             <textarea asp-for="ModifyItem.Item.Description" class="form-control"></textarea>
         </div>
         <div class="mb-3">
-            <label asp-for="ModifyItem.Item.CategoryId" class="form-label">Category</label>
-            <select asp-for="ModifyItem.Item.CategoryId" class="form-select">
-                @foreach (var category in Model.Categories.Items)
+            <label asp-for="ModifyItem.Item.Category_catId" class="form-label">Category</label>
+            <select asp-for="ModifyItem.Item.Category_catId" class="form-select">
+                @foreach (var category in Model.Categories.Categories)
                 {
-                    <option value="@category.CategoryId"
-                            selected="@(category.CategoryId == Model.ModifyItem.Item.CategoryId)">
-                        @category.CategoryName
+                    <option value="@category.Id"
+                            selected="@(category.Id == Model.ModifyItem.Item.Id)">
+                        @category.Description
                     </option>
                 }
             </select>
@@ -106,11 +106,11 @@
             </div>
         </div>
         <div class="mb-3">
-            <label asp-for="ModifyItem.Item.DayOfMonth" class="form-label">Day Due</label>
-            <select asp-for="ModifyItem.Item.DayOfMonth" class="form-select">
+            <label asp-for="ModifyItem.Item.Day" class="form-label">Day Due</label>
+            <select asp-for="ModifyItem.Item.Day" class="form-select">
                 @for (int i = 1; i <= 31; i++)
                 {
-                    <option value="@i" selected="@(i == Model.ModifyItem.Item.DayOfMonth)">@i</option>
+                    <option value="@i" selected="@(i == Model.ModifyItem.Item.Day)">@i</option>
                 }
             </select>
         </div>
@@ -122,52 +122,52 @@
             </div>
             <div id="month-checkbox-container" class="mb-3">
                 <div>
-                    <label asp-for="ModifyItem.Item.January" class="form-label">January</label><br />
-                    <input asp-for="ModifyItem.Item.January" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Jan" class="form-label">January</label><br />
+                    <input asp-for="ModifyItem.Item.Jan" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.February" class="form-label">February</label><br />
-                    <input asp-for="ModifyItem.Item.February" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Feb" class="form-label">February</label><br />
+                    <input asp-for="ModifyItem.Item.Feb" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.March" class="form-label">March</label><br />
-                    <input asp-for="ModifyItem.Item.March" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Mar" class="form-label">March</label><br />
+                    <input asp-for="ModifyItem.Item.Mar" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.April" class="form-label">April</label><br />
-                    <input asp-for="ModifyItem.Item.April" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Apr" class="form-label">April</label><br />
+                    <input asp-for="ModifyItem.Item.Apr" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
                     <label asp-for="ModifyItem.Item.May" class="form-label">May</label><br />
                     <input asp-for="ModifyItem.Item.May" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.June" class="form-label">June</label><br />
-                    <input asp-for="ModifyItem.Item.June" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Jun" class="form-label">June</label><br />
+                    <input asp-for="ModifyItem.Item.Jun" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.July" class="form-label">July</label><br />
-                    <input asp-for="ModifyItem.Item.July" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Jul" class="form-label">July</label><br />
+                    <input asp-for="ModifyItem.Item.Jul" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.August" class="form-label">August</label><br />
-                    <input asp-for="ModifyItem.Item.August" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Aug" class="form-label">August</label><br />
+                    <input asp-for="ModifyItem.Item.Aug" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.September" class="form-label">September</label><br />
-                    <input asp-for="ModifyItem.Item.September" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Sep" class="form-label">September</label><br />
+                    <input asp-for="ModifyItem.Item.Sep" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.October" class="form-label">October</label><br />
-                    <input asp-for="ModifyItem.Item.October" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Oct" class="form-label">October</label><br />
+                    <input asp-for="ModifyItem.Item.Oct" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.November" class="form-label">November</label><br />
-                    <input asp-for="ModifyItem.Item.November" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Nov" class="form-label">November</label><br />
+                    <input asp-for="ModifyItem.Item.Nov" type="checkbox" class="form-check-input" />
                 </div>
                 <div>
-                    <label asp-for="ModifyItem.Item.December" class="form-label">December</label><br />
-                    <input asp-for="ModifyItem.Item.December" type="checkbox" class="form-check-input" />
+                    <label asp-for="ModifyItem.Item.Dec" class="form-label">December</label><br />
+                    <input asp-for="ModifyItem.Item.Dec" type="checkbox" class="form-check-input" />
                 </div>
             </div>
         </div>
@@ -269,23 +269,23 @@
             Id: parseInt('@Model.ModifyItem.Item.Id'),
             Name: document.querySelector('[name="ModifyItem.Item.Name"]').value.trim(),
             Description: document.querySelector('[name="ModifyItem.Item.Description"]').value.trim(),
-            CategoryId: parseInt(document.querySelector('[name="ModifyItem.Item.CategoryId"]').value),
+            Category_catId: parseInt(document.querySelector('[name="ModifyItem.Item.Category_catId"]').value),
             MinimumDue: parseFloat(document.querySelector('[name="ModifyItem.Item.MinimumDue"]').value) || 0,
             Balance: parseFloat(document.querySelector('[name="ModifyItem.Item.Balance"]').value) || null,
             InterestRate: parseFloat(document.querySelector('[name="ModifyItem.Item.InterestRate"]').value) || null,
-            DayOfMonth: parseInt(document.querySelector('[name="ModifyItem.Item.DayOfMonth"]').value),
-            January: document.querySelector('[name="ModifyItem.Item.January"]').checked,
-            February: document.querySelector('[name="ModifyItem.Item.February"]').checked,
-            March: document.querySelector('[name="ModifyItem.Item.March"]').checked,
-            April: document.querySelector('[name="ModifyItem.Item.April"]').checked,
+            Day: parseInt(document.querySelector('[name="ModifyItem.Item.Day"]').value),
+            Jan: document.querySelector('[name="ModifyItem.Item.Jan"]').checked,
+            Feb: document.querySelector('[name="ModifyItem.Item.Feb"]').checked,
+            Mar: document.querySelector('[name="ModifyItem.Item.Mar"]').checked,
+            Apr: document.querySelector('[name="ModifyItem.Item.Apr"]').checked,
             May: document.querySelector('[name="ModifyItem.Item.May"]').checked,
-            June: document.querySelector('[name="ModifyItem.Item.June"]').checked,
-            July: document.querySelector('[name="ModifyItem.Item.July"]').checked,
-            August: document.querySelector('[name="ModifyItem.Item.August"]').checked,
-            September: document.querySelector('[name="ModifyItem.Item.September"]').checked,
-            October: document.querySelector('[name="ModifyItem.Item.October"]').checked,
-            November: document.querySelector('[name="ModifyItem.Item.November"]').checked,
-            December: document.querySelector('[name="ModifyItem.Item.December"]').checked,
+            Jun: document.querySelector('[name="ModifyItem.Item.Jun"]').checked,
+            Jul: document.querySelector('[name="ModifyItem.Item.Jul"]').checked,
+            Aug: document.querySelector('[name="ModifyItem.Item.Aug"]').checked,
+            Sep: document.querySelector('[name="ModifyItem.Item.Sep"]').checked,
+            Oct: document.querySelector('[name="ModifyItem.Item.Oct"]').checked,
+            Nov: document.querySelector('[name="ModifyItem.Item.Nov"]').checked,
+            Dec: document.querySelector('[name="ModifyItem.Item.Dec"]').checked,
             PaidOff: document.querySelector('[name="ModifyItem.Item.PaidOff"]').checked
         };
 

@@ -10,12 +10,9 @@ namespace home_manager.Areas.BudgetManager.Models
         public int Id { get; set; } = 0;
 
         [Column("cat_transaction_type_tst_id")]
-        public int TransactionType_tstID { get; set; } = 0;
+        public int TransactionType_tstId { get; set; } = 0;
 
         [Column("cat_description")]
         public string Description { get; set; } = String.Empty;
-
-        [Column("cat_date_created")]
-        public DateTime DateCreated { get; set; } = DateTime.Now;
     }
 }

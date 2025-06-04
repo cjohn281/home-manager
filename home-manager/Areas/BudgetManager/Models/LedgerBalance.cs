@@ -23,8 +23,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("lbl_ending_savings_balance")]
         public float EndingSavingsBalance { get; set; }
-
-        [Column("lbl_date_created")]
-        public DateTime DateCreated { get; set; }
     }
 }

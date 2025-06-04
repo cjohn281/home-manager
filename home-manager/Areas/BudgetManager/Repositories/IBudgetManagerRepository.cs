@@ -12,5 +12,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<IEnumerable<IncidentalItem>> GetIncidentalItemsAsync(int month, int year);
         Task<IEnumerable<TransactionType>> GetIncidentalTransactionTypesAsync();
         Task<IEnumerable<Category>> GetIncidentalCategoriesAsync();
+        Task<bool> UpdateRecurringItem(RecurringItem item);
+        Task<bool> DeleteRecurringItemAsync(int itemId);
     }
 }

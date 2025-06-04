@@ -12,7 +12,5 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("inc_ledger_ldg_id")]
         public int Ledger_ldgID { get; set; }
 
-        [Column("inc_date_created")]
-        public DateTime DateCreated { get; set; }
     }
 }

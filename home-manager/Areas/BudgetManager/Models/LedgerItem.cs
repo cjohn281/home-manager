@@ -26,8 +26,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Required, Column("lgi_is_paid")]
         public bool IsPaid { get; set; }
-
-        [Column("lgi_date_created")]
-        public DateTime DateCreated { get; set; }
     }
 }

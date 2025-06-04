@@ -14,8 +14,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Required, Column("ldg_year")]
         public required int Year { get; set; }
-
-        [Column("ldg_date_created")]
-        public DateTime DateCreated { get; set; }
     }
 }

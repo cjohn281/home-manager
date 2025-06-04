@@ -26,8 +26,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("ici_category_cat_id")]
         public int Category_catID { get; set; } = 0;
-
-        [Column("ici_date_created")]
-        public DateTime DateCreated { get; set; } = DateTime.Now;
     }
 }

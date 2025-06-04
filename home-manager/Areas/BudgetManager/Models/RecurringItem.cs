@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_manager.Areas.BudgetManager.Models
 {
@@ -16,7 +15,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public string? Description { get; set; }
 
         [Column("rci_category_cat_id")]
-        public int Category_catID { get; set; } = 10;
+        public int Category_catId { get; set; } = 10;
 
         [Column("rci_minimum_due")]
         public decimal MinimumDue { get; set; } = 0.0M;
@@ -68,8 +67,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("rci_paid_off")]
         public bool PaidOff { get; set; } = false;
-
-        [Column("rci_date_created")]
-        public DateTime DateCreated { get; set; } = DateTime.Now;
     }
 }

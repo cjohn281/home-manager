@@ -11,8 +11,5 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("tst_description")]
         public string Description { get; set; } = String.Empty;
-
-        [Column("tst_date_created")]
-        public DateTime DateCreated { get; set; } = DateTime.Now;
     }
 }
