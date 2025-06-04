@@ -282,6 +282,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
             {
                 using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
                 await connection.OpenAsync();
+
                 var items = (await connection.QueryAsync<RecurringItem>(
                     "SELECT * FROM fnc_get_recurring_items_by_category(@categoryId)", new { categoryId }
                 ))?.ToList();
@@ -403,6 +404,46 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
+            }
+        }
+
+        public async Task<IEnumerable<Category>> GetCategoriesByTransactionId(int transactionId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    transactionId = transactionId
+                };
+
+                var categories = (await connection.QueryAsync<Category>(
+                    "SELECT * FROM fnc_get_categories_by_transaction_type_id(@transactionId)", parameters
+                ))?.ToList();
+
+                if (categories == null || categories.Count == 0)
+                {
+                    return new List<Category> { new Category() };
+                }
+
+                return categories;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<Category> { new Category() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<Category> { new Category() };
             }
         }
     }

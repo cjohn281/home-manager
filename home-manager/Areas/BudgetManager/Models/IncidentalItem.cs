@@ -10,7 +10,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public int Id { get; set; } = 0;
 
         [Column("ici_incidental_inc_id")]
-        public int Incidental_incID { get; set; } = 0;
+        public int Incidental_incId { get; set; } = 0;
 
         [Column("ici_name")]
         public string Name { get; set; } = String.Empty;
@@ -19,7 +19,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public string Description { get; set; } = String.Empty;
 
         [Column("ici_date")]
-        public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateTime Date { get; set; } = DateTime.Now;
 
         [Column("ici_amount")]
         public decimal Amount { get; set; } = 0.0M;

@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
 using home_manager.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -11,24 +12,21 @@ namespace home_manager.Areas.BudgetManager.Controllers
     [Authorize]
     public class IncidentalExpensesController : Controller
     {
-        private readonly DbConnectionService _dbConnection;
+        private readonly IBudgetManagerRepository _repository;
 
-        public IncidentalExpensesController(DbConnectionService dbConnection)
+        public IncidentalExpensesController(IBudgetManagerRepository repository)
         {
-            _dbConnection = dbConnection;
+            _repository = repository;
         }
 
 
         public async Task<IActionResult> Index()
         {
-            var model = new AvailableLedgerDropdown_VModel(_dbConnection);
+            var model = new AvailableLedgerDropdown_VModel();
 
-            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-            {
-                return BadRequest("Database connection string is not configured.");
-            }
+            model.LedgerMonths = (await _repository.GetAvailableLedgerMonthsAsync()).ToList();
+            model.LedgerYears = (await _repository.GetAvailableLedgerYearsAsync()).ToList();
 
-            await model.LoadAvailableLedgerDropdowns();
             return View(model);
         }
 
@@ -37,45 +35,22 @@ namespace home_manager.Areas.BudgetManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetIncidentalExpensesTable(int month, int year)
         {
-            var model = new IncidentalItems_VModel(_dbConnection);
+            var model = new IncidentalItems_VModel();
 
-            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-            {
-                return BadRequest("Database connection string is not configured.");
-            }
+            model.Items = (await _repository.GetIncidentalItemsAsync(month, year)).ToList();
+            model.DynamicCategoryOptions = (await _repository.GetIncidentalCategoriesAsync()).ToList();
+            model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypesAsync()).ToList();
 
-            await model.LoadIncidentalItemsAsync(month, year);
-            await model.GetDynamicOptions();
             return PartialView("_IncidentalExpensesTable", model);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCategoriesByTransaction(int transactionId)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-                {
-                    return BadRequest("Database connection string is not configured.");
-                }
 
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
+            var categories = (await _repository.GetCategoriesByTransactionId(transactionId)).ToList();
 
-                var categories = await connection.QueryAsync<dynamic>(
-                    "SELECT cat_id as id, cat_description as description " +
-                    "FROM tbl_category " +
-                    "WHERE cat_transaction_type_tst_id = @transactionId " +
-                    "ORDER BY cat_description",
-                    new { transactionId }
-                );
-
-                return Json(categories);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error loading categories: {ex.Message}");
-            }
+            return Json(categories);
         }
     }
 }

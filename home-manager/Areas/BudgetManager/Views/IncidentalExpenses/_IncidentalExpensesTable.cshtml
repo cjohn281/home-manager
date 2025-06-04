@@ -38,12 +38,12 @@
                     <span class="visually-hidden">Button</span>
                 </button>
             </td>
-            <td>@item.DateIncurred.ToShortDateString()</td> //date
+            <td>@item.Date.ToShortDateString()</td> //date
             <td>@item.Name</td> //expense
             <td>@FormatHelper.FormatCurrency(item.Amount)</td> //amount
             <td>@item.Description</td> //description
-            <td>@item.TransactionDescription</td>
-            <td>@item.CategoryName</td> //category name
+            <td></td>
+            <td></td> //category name
         }
     </tr>
     <tr id="_IncidentalExpensesDynamicRow">

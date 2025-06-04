@@ -8,10 +8,7 @@ using System.Diagnostics;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-    /// <summary>
-    /// Controller for managing recurring expenses in the Budget Manager area.
-    /// Handles CRUD operations for recurring expense items and their categories.
-    /// </summary>
+
     [Area("BudgetManager")]
     [Authorize]
     public class RecurringExpensesController : Controller

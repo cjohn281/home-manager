@@ -14,5 +14,6 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<IEnumerable<Category>> GetIncidentalCategoriesAsync();
         Task<bool> UpdateRecurringItem(RecurringItem item);
         Task<bool> DeleteRecurringItemAsync(int itemId);
+        Task<IEnumerable<Category>> GetCategoriesByTransactionId(int transactionId);
     }
 }
