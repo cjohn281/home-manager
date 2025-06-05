@@ -1,10 +1,12 @@
 ﻿using Dapper;
+using home_manager.Areas.BudgetManager.Models;
 using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
 using home_manager.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using System.Diagnostics;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
@@ -54,6 +56,39 @@ namespace home_manager.Areas.BudgetManager.Controllers
             var categories = (await _repository.GetCategoriesByTransactionId(transactionId)).ToList();
 
             return Json(categories);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateIncidentalExpense([FromBody] IncidentalUpdateItem model)
+        {
+            if (model == null || model.IncidentalItem == null)
+                return BadRequest("No data provided.");
+
+            // Basic validation
+            if (string.IsNullOrWhiteSpace(model.IncidentalItem.Name))
+                return BadRequest("Name is required.");
+            if (model.IncidentalItem.Category_catID == 0)
+                return BadRequest("Category is required.");
+            if (model.month == 0 || model.year == 0)
+                return BadRequest("Month and year are required.");
+
+            try
+            {
+                // Save the incidental item using the repository
+                var result = await _repository.UpdateIncidentalItem(model.IncidentalItem, model.month, model.year);
+
+                if (result)
+                    return Json(new { success = true });
+                else
+                    return BadRequest("Failed to save the incidental expense.");
+            }
+            catch (Exception ex)
+            {
+                // Log the error as needed
+                return BadRequest($"Error saving incidental expense: {ex.Message}");
+            }
         }
     }
 }

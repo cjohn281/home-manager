@@ -13,6 +13,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<IEnumerable<TransactionType>> GetIncidentalTransactionTypesAsync();
         Task<IEnumerable<Category>> GetIncidentalCategoriesAsync();
         Task<bool> UpdateRecurringItem(RecurringItem item);
+        Task<bool> UpdateIncidentalItem(IncidentalItem item, int month, int year);
         Task<bool> DeleteRecurringItemAsync(int itemId);
         Task<IEnumerable<Category>> GetCategoriesByTransactionId(int transactionId);
         Task<(int, int)> GetLatestAvailableLedger();

@@ -144,5 +144,86 @@
             });  
         }
 
+            function updateCategoryDropdown() {
+            const transactionId = $('#transactionDropdown').val();
+            const categoryDropdown = $('#categoryDropdown');
+
+            categoryDropdown.prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("GetCategoriesByTransaction", "IncidentalExpenses", new { area = "BudgetManager" })',
+                type: 'GET',
+                data: { transactionId: transactionId},
+                success: function(data) {
+                    categoryDropdown.empty();
+
+                    $.each(data, function(index, category) {
+                        categoryDropdown.append(
+                            $('<option></option>')
+                                .val(category.id)
+                                .text(category.description)
+                        );
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading categories:', error);
+                    categoryDropdown.html('<option value="">Error loading categories</option>');
+                },
+                complete: function() {
+                    categoryDropdown.prop('disabled', false);
+                }
+            });
+        }
+
+                function saveItem() {
+            // Get form data from the dynamic row
+            const formData = {
+                // Example: collect values from your dynamic row inputs
+                Name: $('#newName').val()?.trim() ?? '',
+                Description: $('#newDescription').val()?.trim() ?? '',
+                Amount: parseFloat($('#newAmount').val()) || 0,
+                Date: $('#newDate').val(),
+                TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,
+                CategoryId: parseInt($('#categoryDropdown').val()) || 0,
+                // Get selected month and year from dropdowns above the table
+                Month: parseInt($('#monthFilter').val()) || 0,
+                Year: parseInt($('#yearFilter').val()) || 0
+            };
+
+            // Basic validation
+            // if (!formData.Name) {
+            //     alert('Name is required');
+            //     return;
+            // }
+            // if (formData.CategoryId === 0) {
+            //     alert('Please select a category');
+            //     return;
+            // }
+
+            poster.on("Saving");
+            $.ajax({
+                url: '@Url.Action("CreateIncidentalExpense", "IncidentalExpenses", new { area = "BudgetManager" })',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Optionally reload the table or clear the dynamic row
+                        loadIncidentalExpensesTable();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
+                },
+                complete: function() {
+                    poster.off();
+                }
+            });
+        }
+
     </script>  
 }

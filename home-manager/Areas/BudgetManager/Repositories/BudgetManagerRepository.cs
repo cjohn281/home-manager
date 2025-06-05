@@ -348,7 +348,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
                     @id, @name, @description, @categoryId, @minimumDue, @balance, @interestRate, @dayOfMonth,
                     @january, @february, @march, @april, @may, @june, @july, @august,
                     @september, @october, @november, @december, @paidOff
-                )",
+                    )",
                     parameters
                 );
 
@@ -488,6 +488,52 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 return (0, 0);
             }
 
+        }
+
+        public async Task<bool> UpdateIncidentalItem(IncidentalItem item, int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    id = item.Id,
+                    incId = item.Incidental_incId,
+                    name = item.Name,
+                    description = item.Description,
+                    date = item.Date,
+                    amount = item.Amount,
+                    catId = item.Category_catID,
+                    month = month,
+                    year = year
+                };
+
+                var result = await connection.ExecuteAsync(
+                    @"CALL spw_update_incidental_item(
+                    @id, @incId, @name, @description, @date, @amount, @catId, @month, @year
+                    )",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
         }
     }
 }
