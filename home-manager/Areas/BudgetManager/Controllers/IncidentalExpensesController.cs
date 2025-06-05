@@ -24,9 +24,10 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             var model = new AvailableLedgerDropdown_VModel();
 
+            model.LatestAvailableLedger = (await _repository.GetLatestAvailableLedger());
             model.LedgerMonths = (await _repository.GetAvailableLedgerMonthsAsync()).ToList();
             model.LedgerYears = (await _repository.GetAvailableLedgerYearsAsync()).ToList();
-
+            
             return View(model);
         }
 
@@ -40,9 +41,11 @@ namespace home_manager.Areas.BudgetManager.Controllers
             model.Items = (await _repository.GetIncidentalItemsAsync(month, year)).ToList();
             model.DynamicCategoryOptions = (await _repository.GetIncidentalCategoriesAsync()).ToList();
             model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypesAsync()).ToList();
+            model.CalculateTotals();
 
             return PartialView("_IncidentalExpensesTable", model);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetCategoriesByTransaction(int transactionId)

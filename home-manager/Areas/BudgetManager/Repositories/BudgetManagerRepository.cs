@@ -446,5 +446,48 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 return new List<Category> { new Category() };
             }
         }
+
+
+        public async Task<(int, int)> GetLatestAvailableLedger()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                string sql = "SELECT * FROM fnc_get_latest_available_ledger()";
+
+                await using var command = new NpgsqlCommand(sql, connection);
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    int month = reader.GetInt32(0);
+                    int year = reader.GetInt32(1);
+
+                    return (month, year);
+                }
+                else
+                {
+                    return (0, 0);
+                }
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return (0, 0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return (0, 0);
+            }
+
+        }
     }
 }

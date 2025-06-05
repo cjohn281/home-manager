@@ -15,5 +15,6 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<bool> UpdateRecurringItem(RecurringItem item);
         Task<bool> DeleteRecurringItemAsync(int itemId);
         Task<IEnumerable<Category>> GetCategoriesByTransactionId(int transactionId);
+        Task<(int, int)> GetLatestAvailableLedger();
     }
 }

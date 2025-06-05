@@ -26,5 +26,11 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("ici_category_cat_id")]
         public int Category_catID { get; set; } = 0;
+
+        public string CategoryName { get; set; } = String.Empty;
+
+        public int TransactionType_tstId { get; set; } = 0;
+
+        public string TransactionTypeName { get; set; } = String.Empty;
     }
 }

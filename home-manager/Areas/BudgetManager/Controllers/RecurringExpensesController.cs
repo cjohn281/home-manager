@@ -56,11 +56,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
             model.CategoryNames = categories.ToDictionary(c => c.Id, c => c.Description);
             model.CalculateTotals();
 
-            foreach (var item in model.Items)
-            {
-                Debug.WriteLine($"Item: {item.Name}, Category_catId: {item.Category_catId}, Category: {model.GetCategoryName(item)}");
-            }
-
             return PartialView("_RecurringExpensesTable", model);
         }
 

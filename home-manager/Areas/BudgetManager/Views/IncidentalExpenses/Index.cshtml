@@ -57,36 +57,28 @@
                     <div class="form-group" id="filter-container">  
                         <div class="col-md-3">  
                             <label for="monthFilter" class="form-label">Month</label>  
-                            <select id="monthFilter" class="form-select" onchange="">  
+                            <select id="monthFilter" class="form-select" onchange="loadIncidentalExpensesTable()">
                                 @foreach (var month in Model.LedgerMonths) {  
                                     <option value="@month"
-                                            selected="@(month == DateTime.Now.Month)">@(DropdownHelper.MonthDropdownOptions[month])</option>
+                                            selected="@Model.LatestAvailableLedger.month">@(DropdownHelper.MonthDropdownOptions[month])</option>
                                 }  
                             </select>  
                         </div>  
                         <div class="col-md-3 ms-2">  
                             <label for="yearFilter" class="form-label">Year</label>  
-                            <select id="yearFilter" class="form-select" onchange="">
+                            <select id="yearFilter" class="form-select" onchange="loadIncidentalExpensesTable()">
                                 @foreach (var year in Model.LedgerYears)
                                 {
                                     <option value="@year"
-                                        selected="@(year == DateTime.Now.Year)">@year</option>
+                                        selected="@Model.LatestAvailableLedger.year">@year</option>
                                 }
-                                
-                            </select>  
-                        </div>  
-                        <div>  
-                            <button type="button" id="add-expense-btn" class="btn btn-outline-primary" style="border: none;" onclick="">  
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">  
-                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />  
-                                </svg>  
-                            </button>  
-                        </div>  
-                    </div>  
-                </div>  
-            </div>  
-        </div>  
-    </div>  
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="card">  
         <div class="card-body">  
