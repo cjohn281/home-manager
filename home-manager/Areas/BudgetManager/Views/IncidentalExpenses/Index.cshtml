@@ -111,7 +111,8 @@
     <script>  
 
         $(document).ready(function () {  
-            loadIncidentalExpensesTable();  
+            loadIncidentalExpensesTable();
+            
         });  
 
         function loadIncidentalExpensesTable() {  
@@ -144,7 +145,7 @@
             });  
         }
 
-            function updateCategoryDropdown() {
+        function updateCategoryDropdown() {
             const transactionId = $('#transactionDropdown').val();
             const categoryDropdown = $('#categoryDropdown');
 
@@ -175,37 +176,43 @@
             });
         }
 
-                function saveItem() {
+        function saveItem() {
             // Get form data from the dynamic row
-            const formData = {
+            const incidentalItem = {
                 // Example: collect values from your dynamic row inputs
-                Name: $('#newName').val()?.trim() ?? '',
+                Name: $('#newExpense').val()?.trim() ?? '',
                 Description: $('#newDescription').val()?.trim() ?? '',
                 Amount: parseFloat($('#newAmount').val()) || 0,
                 Date: $('#newDate').val(),
                 TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,
-                CategoryId: parseInt($('#categoryDropdown').val()) || 0,
-                // Get selected month and year from dropdowns above the table
-                Month: parseInt($('#monthFilter').val()) || 0,
-                Year: parseInt($('#yearFilter').val()) || 0
+                Category_catId: parseInt($('#categoryDropdown').val()) || 0
             };
 
-            // Basic validation
-            // if (!formData.Name) {
-            //     alert('Name is required');
-            //     return;
-            // }
-            // if (formData.CategoryId === 0) {
-            //     alert('Please select a category');
-            //     return;
-            // }
+            // Get selected month and year from dropdowns above the table
+            const month = parseInt($('#monthFilter').val()) || 0;
+            const year = parseInt($('#yearFilter').val()) || 0;
+
+            if (!incidentalItem.Name) {
+                alert('Expense is required');
+                return;
+            }
+            if (incidentalItem.Amount === 0) {
+                alert('Amount is required');
+                return;
+            }
+
+            const payload = {
+                model: incidentalItem,
+                month: month,
+                year: year
+            };
 
             poster.on("Saving");
             $.ajax({
                 url: '@Url.Action("CreateIncidentalExpense", "IncidentalExpenses", new { area = "BudgetManager" })',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(formData),
+                data: JSON.stringify(payload),
                 headers: {
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
@@ -223,6 +230,31 @@
                     poster.off();
                 }
             });
+        }
+
+        function pad2(n) { return n < 10 ? '0' + n : n; }
+
+        function setDateInputRange() {
+            const month = parseInt($('#monthFilter').val());
+            const year = parseInt($('#yearFilter').val());
+            if (!month || !year) return;
+
+            // First day of month
+            const minDate = `${year}-${pad2(month)}-01`;
+            // Last day of month
+            const lastDay = new Date(year, month, 0).getDate();
+            const maxDate = `${year}-${pad2(month)}-${pad2(lastDay)}`;
+
+            $('#newDate').attr('min', minDate).attr('max', maxDate);
+
+            // If current value is outside the range, reset to min
+            const current = $('#newDate').val();
+            if (current < minDate || current > maxDate) {
+                $('#newDate').val(minDate);
+            }
+
+            console.log(minDate);
+            console.log(maxDate);
         }
 
     </script>  

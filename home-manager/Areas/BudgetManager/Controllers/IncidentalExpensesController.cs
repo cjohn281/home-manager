@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using home_manager.Areas.BudgetManager.DTOs;
 using home_manager.Areas.BudgetManager.Models;
 using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
@@ -61,23 +62,32 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateIncidentalExpense([FromBody] IncidentalUpdateItem model)
+        public async Task<IActionResult> CreateIncidentalExpense([FromBody] IncidentalExpenseDTO dto)
         {
-            if (model == null || model.IncidentalItem == null)
+
+            var model = dto.Model;
+            var month = dto.Month;
+            var year = dto.Year;
+
+            Debug.WriteLine(month.ToString());
+            Debug.WriteLine(year.ToString());
+            Debug.WriteLine(model.Name);
+
+            if (model == null)
                 return BadRequest("No data provided.");
 
             // Basic validation
-            if (string.IsNullOrWhiteSpace(model.IncidentalItem.Name))
-                return BadRequest("Name is required.");
-            if (model.IncidentalItem.Category_catID == 0)
+            if (string.IsNullOrWhiteSpace(model.Name))
+                return BadRequest("Expense is required.");
+            if (model.Category_catID == 0)
                 return BadRequest("Category is required.");
-            if (model.month == 0 || model.year == 0)
+            if (month == 0 || year == 0)
                 return BadRequest("Month and year are required.");
 
             try
             {
                 // Save the incidental item using the repository
-                var result = await _repository.UpdateIncidentalItem(model.IncidentalItem, model.month, model.year);
+                var result = await _repository.UpdateIncidentalItem(model, month, year);
 
                 if (result)
                     return Json(new { success = true });
