@@ -28,8 +28,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
             var model = new AvailableLedgerDropdown_VModel();
 
             model.LatestAvailableLedger = (await _repository.GetLatestAvailableLedger());
-            model.LedgerMonths = (await _repository.GetAvailableLedgerMonthsAsync()).ToList();
-            model.LedgerYears = (await _repository.GetAvailableLedgerYearsAsync()).ToList();
+            model.LedgerMonths = (await _repository.GetAvailableLedgerMonths()).ToList();
+            model.LedgerYears = (await _repository.GetAvailableLedgerYears()).ToList();
             
             return View(model);
         }
@@ -37,14 +37,17 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetIncidentalExpensesTable(int month, int year)
+        public async Task<IActionResult> GetIncidentalExpensesTable(int month, int year, int editableId)
         {
             var model = new IncidentalItems_VModel();
 
-            model.Items = (await _repository.GetIncidentalItemsAsync(month, year)).ToList();
-            model.DynamicCategoryOptions = (await _repository.GetIncidentalCategoriesAsync()).ToList();
-            model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypesAsync()).ToList();
+            model.Items = (await _repository.GetIncidentalItems(month, year)).ToList();
+            model.DynamicCategoryOptions = (await _repository.GetIncidentalCategories()).ToList();
+            model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypes()).ToList();
+            model.EditableItemId = editableId;
             model.CalculateTotals();
+
+            Debug.WriteLine($"CategoryName: {model.Items[0].CategoryName}");
 
             return PartialView("_IncidentalExpensesTable", model);
         }
@@ -62,7 +65,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateIncidentalExpense([FromBody] IncidentalExpenseDTO dto)
+        public async Task<IActionResult> UpdateIncidentalExpense([FromBody] IncidentalExpenseDTO dto)
         {
 
             var model = dto.Model;
@@ -98,6 +101,32 @@ namespace home_manager.Areas.BudgetManager.Controllers
             {
                 // Log the error as needed
                 return BadRequest($"Error saving incidental expense: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteIncidentalItem(int itemId)
+        {
+            try
+            {
+                var success = await _repository.DeleteIncidentalItem(itemId);
+
+                Debug.WriteLine($"Item ID: {itemId}");
+
+                if (success)
+                {
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return BadRequest("Failed to delete incidental item");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error deleting incidental item: {ex.Message}");
             }
         }
     }

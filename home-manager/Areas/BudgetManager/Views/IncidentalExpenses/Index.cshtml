@@ -51,13 +51,14 @@
     <h2 class="mb-4">Incidental Expenses</h2>  
 
     <div class="card">  
-        <div class="card-body">  
+        <div class="card-body">
+            <input type="hidden" id="edit-item" name="edit-item" value="0" />
             <div class="row">  
                 <div class="col-md-12">  
                     <div class="form-group" id="filter-container">  
                         <div class="col-md-3">  
                             <label for="monthFilter" class="form-label">Month</label>  
-                            <select id="monthFilter" class="form-select" onchange="loadIncidentalExpensesTable()">
+                            <select id="monthFilter" class="form-select" onchange="refreshIncidentalExpensesTable()">
                                 @foreach (var month in Model.LedgerMonths) {  
                                     <option value="@month"
                                             selected="@Model.LatestAvailableLedger.month">@(DropdownHelper.MonthDropdownOptions[month])</option>
@@ -66,7 +67,7 @@
                         </div>  
                         <div class="col-md-3 ms-2">  
                             <label for="yearFilter" class="form-label">Year</label>  
-                            <select id="yearFilter" class="form-select" onchange="loadIncidentalExpensesTable()">
+                            <select id="yearFilter" class="form-select" onchange="refreshIncidentalExpensesTable()">
                                 @foreach (var year in Model.LedgerYears)
                                 {
                                     <option value="@year"
@@ -111,7 +112,7 @@
     <script>  
 
         $(document).ready(function () {  
-            loadIncidentalExpensesTable();
+            refreshIncidentalExpensesTable();
             
         });  
 
@@ -124,7 +125,7 @@
             $.ajax({  
                 url: '@Url.Action("GetIncidentalExpensesTable", "IncidentalExpenses", new { area = "BudgetManager" })',  
                 type: 'POST',
-                data: { month: ledgerMonth, year: ledgerYear },
+                data: { month: ledgerMonth, year: ledgerYear, editableId: parseInt($('#edit-item').val()) },
                 headers: {  
                     // Include anti-forgery token for security  
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()  
@@ -176,60 +177,64 @@
             });
         }
 
-        function saveItem() {
-            // Get form data from the dynamic row
+        function saveItem(incidental_item) {  
+            const amount = parseFloat($('#newAmount').val()) || 0;  
+            let formattedAmount = $('#categoryDropdown').text().trim() === "Receive" ? (Math.abs(amount) * -1) : Math.abs(amount);
+
+            const itemId = $(incidental_item).attr("id").split('-')[1];
+
+            // Get form data from the dynamic row  
             const incidentalItem = {
-                // Example: collect values from your dynamic row inputs
-                Name: $('#newExpense').val()?.trim() ?? '',
-                Description: $('#newDescription').val()?.trim() ?? '',
-                Amount: parseFloat($('#newAmount').val()) || 0,
-                Date: $('#newDate').val(),
-                TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,
-                Category_catId: parseInt($('#categoryDropdown').val()) || 0
-            };
+                Id: parseInt(itemId),
+                Name: $('#newExpense').val()?.trim() ?? '',  
+                Description: $('#newDescription').val()?.trim() ?? '',  
+                Amount: formattedAmount,  
+                Date: $('#newDate').val(),  
+                TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,  
+                Category_catId: parseInt($('#categoryDropdown').val()) || 0  
+            };  
 
-            // Get selected month and year from dropdowns above the table
-            const month = parseInt($('#monthFilter').val()) || 0;
-            const year = parseInt($('#yearFilter').val()) || 0;
+            // Get selected month and year from dropdowns above the table  
+            const month = parseInt($('#monthFilter').val()) || 0;  
+            const year = parseInt($('#yearFilter').val()) || 0;  
 
-            if (!incidentalItem.Name) {
-                alert('Expense is required');
-                return;
-            }
-            if (incidentalItem.Amount === 0) {
-                alert('Amount is required');
-                return;
-            }
+            if (!incidentalItem.Name) {  
+                alert('Expense is required');  
+                return;  
+            }  
+            if (incidentalItem.Amount === 0) {  
+                alert('Amount is required');  
+                return;  
+            }  
 
-            const payload = {
-                model: incidentalItem,
-                month: month,
+            const payload = {  
+                model: incidentalItem,  
+                month: month,  
                 year: year
-            };
+            };  
 
-            poster.on("Saving");
-            $.ajax({
-                url: '@Url.Action("CreateIncidentalExpense", "IncidentalExpenses", new { area = "BudgetManager" })',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(payload),
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Optionally reload the table or clear the dynamic row
-                        loadIncidentalExpensesTable();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
-                },
-                complete: function() {
-                    poster.off();
-                }
-            });
+            poster.on("Saving");  
+            $.ajax({  
+                url: '@Url.Action("UpdateIncidentalExpense", "IncidentalExpenses", new { area = "BudgetManager" })',  
+                type: 'POST',  
+                contentType: 'application/json',  
+                data: JSON.stringify(payload),  
+                headers: {  
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()  
+                },  
+                success: function(response) {  
+                    if (response.success) {  
+                        refreshIncidentalExpensesTable();  
+                    }  
+                },  
+                error: function(xhr, status, error) {  
+                    console.error('Error:', error);  
+                    alert(xhr.responseText || 'Failed to save changes. Please try again.');  
+                },  
+                complete: function() {  
+                    poster.off();  
+                }  
+            });  
         }
 
         function pad2(n) { return n < 10 ? '0' + n : n; }
@@ -252,10 +257,52 @@
             if (current < minDate || current > maxDate) {
                 $('#newDate').val(minDate);
             }
-
-            console.log(minDate);
-            console.log(maxDate);
         }
 
+        function deleteIncidentalItem(incidental_item) {
+            const item = $(incidental_item).attr("id").split('-');
+            const itemId = item[1];
+            const itemName = item[2];
+            poster.on();
+
+            if(confirm(`Are you sure you want to delete ${itemName}?`)) {
+                $.ajax({
+                    url: '@Url.Action("DeleteIncidentalItem", "IncidentalExpenses", new { area = "BudgetManager" })',
+                    type: 'POST',
+                    data: { itemId: itemId },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        refreshIncidentalExpensesTable();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                        console.log('Status:', status);
+                        console.log('Response', response);
+                    },
+                    complete: function() {
+                        poster.off();
+                    }
+                });
+            } else {
+                poster.off();
+            }
+        }
+
+        function enableEditMode(itemId) {
+            $('#edit-item').val(itemId);
+            console.log($('#edit-item').val());
+            loadIncidentalExpensesTable();
+        }
+
+        function refreshIncidentalExpensesTable() {
+            $('#edit-item').val('0');
+            loadIncidentalExpensesTable();
+        }
+
+        // function lockDynamicRow() {
+        //     $('#_IncidentalExpensesDynamicRow').find('button, input, select').prop('disabled', true);
+        // }
     </script>  
 }

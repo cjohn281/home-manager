@@ -17,6 +17,7 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         public List<TransactionType> DynamicTransactionOptions { get; set; } = new();
         public Dictionary<int, string> CategoryNames { get; set; } = new();
         public Dictionary<int, string> TransactionTypeNames { get; set; } = new();
+        public int EditableItemId { get; set; } = 0;
 
         public decimal TotalAmount { get; private set; } = 0.0M;
 

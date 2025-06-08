@@ -34,7 +34,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
         public async Task<IActionResult> Index()
         {
             var model = new RecurringCategoryFilterItems_VModel();
-            model.Categories = (await _repository.GetRecurringCategoryFilterItemsAsync()).ToList();
+            model.Categories = (await _repository.GetRecurringCategoryFilterItems()).ToList();
             return View(model);
         }
 
@@ -51,8 +51,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
         public async Task<IActionResult> GetRecurringExpensesTable(int categoryId)
         {
             var model = new RecurringItems_VModel();
-            model.Items = (await _repository.GetRecurringItemsByCategoryIdAsync(categoryId)).ToList();
-            var categories = (await _repository.GetRecurringCategoryFilterItemsAsync()).ToList();
+            model.Items = (await _repository.GetRecurringItemsByCategoryId(categoryId)).ToList();
+            var categories = (await _repository.GetRecurringCategoryFilterItems()).ToList();
             model.CategoryNames = categories.ToDictionary(c => c.Id, c => c.Description);
             model.CalculateTotals();
 
@@ -73,8 +73,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             var model = new ModifyItemCombinedViewModel()
             {
-                ModifyItem = new ModifyItem_VModel() { Item = await _repository.GetRecurringItemByIdAsync(itemId) },
-                Categories = new RecurringCategoryFilterItems_VModel() { Categories = (await _repository.GetRecurringCategoryFilterItemsAsync()).ToList() }
+                ModifyItem = new ModifyItem_VModel() { Item = await _repository.GetRecurringItemById(itemId) },
+                Categories = new RecurringCategoryFilterItems_VModel() { Categories = (await _repository.GetRecurringCategoryFilterItems()).ToList() }
             };
 
             return PartialView("_ModifyModal", model);
@@ -157,7 +157,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             try
             {
-                var success = await _repository.DeleteRecurringItemAsync(itemId);
+                var success = await _repository.DeleteRecurringItem(itemId);
 
                 if (success)
                 {

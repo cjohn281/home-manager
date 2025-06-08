@@ -17,7 +17,50 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
-        public async Task<IEnumerable<int>> GetAvailableLedgerMonthsAsync()
+        public async Task<(int, int)> GetLatestAvailableLedger()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                string sql = "SELECT * FROM fnc_get_latest_available_ledger()";
+
+                await using var command = new NpgsqlCommand(sql, connection);
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    int month = reader.GetInt32(0);
+                    int year = reader.GetInt32(1);
+
+                    return (month, year);
+                }
+                else
+                {
+                    return (0, 0);
+                }
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return (0, 0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetLatestAvailableLedger: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return (0, 0);
+            }
+
+        }
+
+
+        public async Task<IEnumerable<int>> GetAvailableLedgerMonths()
         {
             try
             {
@@ -46,7 +89,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in GetAvailableLedgerMonths: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<int> { 0 };
             }
@@ -54,7 +97,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
-        public async Task<IEnumerable<int>> GetAvailableLedgerYearsAsync()
+        public async Task<IEnumerable<int>> GetAvailableLedgerYears()
         {
             try
             {
@@ -83,128 +126,14 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in GetAvailableLedgerYears: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<int> { 0 };
             }
         }
 
 
-        public async Task<IEnumerable<Category>> GetIncidentalCategoriesAsync()
-        {
-
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-                var categories = (await connection.QueryAsync<Category>(
-                    "SELECT * FROM fnc_get_incidental_categories()", new { }
-                ))?.ToList();
-
-                if (categories == null || categories.Count == 0)
-                {
-                    return new List<Category> { new() };
-                }
-
-                return categories;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new List<Category> { new() };
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new List<Category> { new() };
-            }
-        }
-
-
-        public async Task<IEnumerable<IncidentalItem>> GetIncidentalItemsAsync(int month, int year)
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                var parameters = new
-                {
-                    month = month,
-                    year = year
-                };
-
-                var items = (await connection.QueryAsync<IncidentalItem>(
-                    "SELECT * FROM fnc_get_incidental_items_by_month(@month, @year)", parameters
-                ))?.ToList();
-
-                if (items == null || items.Count == 0)
-                {
-                    return new List<IncidentalItem> { new IncidentalItem() };
-                }
-
-                return items;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new List<IncidentalItem> { new IncidentalItem() };
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new List<IncidentalItem> { new IncidentalItem() };
-            }
-        }
-
-
-        public async Task<IEnumerable<TransactionType>> GetIncidentalTransactionTypesAsync()
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                var transactions = (await connection.QueryAsync<TransactionType>(
-                    "SELECT * FROM fnc_get_incidental_transaction_types()", new { }
-                )).ToList();
-
-                if (transactions == null || transactions.Count == 0)
-                {
-                    return new List<TransactionType> { new TransactionType() };
-                }
-
-                return transactions;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new List<TransactionType> { new TransactionType() };
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new List<TransactionType> { new TransactionType() };
-            }
-        }
-
-
-        public async Task<IEnumerable<Category>> GetRecurringCategoryFilterItemsAsync()
+        public async Task<IEnumerable<Category>> GetRecurringCategoryFilterItems()
         {
             try
             {
@@ -233,50 +162,14 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in GetRecurringCategoryFilterItems: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<Category> { new Category() };
             }
         }
 
 
-        public async Task<RecurringItem> GetRecurringItemByIdAsync(int recurringItemId)
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                var item = await connection.QueryFirstOrDefaultAsync<RecurringItem>(
-                    "SELECT * FROM fnc_get_recurring_item_by_id(@recurringItemId)", new { recurringItemId }
-                );
-
-                if (item == null)
-                {
-                    return new RecurringItem();
-                }
-
-                return item;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new RecurringItem();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new RecurringItem();
-            }
-        }
-
-
-        public async Task<IEnumerable<RecurringItem>> GetRecurringItemsByCategoryIdAsync(int categoryId)
+        public async Task<IEnumerable<RecurringItem>> GetRecurringItemsByCategoryId(int categoryId)
         {
             try
             {
@@ -305,11 +198,48 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in GetRecurringItemsByCategoryId: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<RecurringItem> { new RecurringItem() };
             }
         }
+
+
+        public async Task<RecurringItem> GetRecurringItemById(int recurringItemId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var item = await connection.QueryFirstOrDefaultAsync<RecurringItem>(
+                    "SELECT * FROM fnc_get_recurring_item_by_id(@recurringItemId)", new { recurringItemId }
+                );
+
+                if (item == null)
+                {
+                    return new RecurringItem();
+                }
+
+                return item;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new RecurringItem();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetRecurringItemById: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new RecurringItem();
+            }
+        }
+
 
         public async Task<bool> UpdateRecurringItem(RecurringItem item)
         {
@@ -371,7 +301,8 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
         }
 
-        public async Task<bool> DeleteRecurringItemAsync(int itemId)
+
+        public async Task<bool> DeleteRecurringItem(int itemId)
         {
             try
             {
@@ -401,11 +332,129 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in DeleteRecurringItem: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }
         }
+
+
+
+
+
+        public async Task<IEnumerable<IncidentalItem>> GetIncidentalItems(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    month = month,
+                    year = year
+                };
+
+                var items = (await connection.QueryAsync<IncidentalItem>(
+                    "SELECT * FROM fnc_get_incidental_items_by_month(@month, @year)", parameters
+                ))?.ToList();
+
+                if (items == null || items.Count == 0)
+                {
+                    return new List<IncidentalItem> { new IncidentalItem() };
+                }
+
+                return items;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<IncidentalItem> { new IncidentalItem() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncidentalItems: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<IncidentalItem> { new IncidentalItem() };
+            }
+        }
+
+
+        public async Task<IEnumerable<TransactionType>> GetIncidentalTransactionTypes()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var transactions = (await connection.QueryAsync<TransactionType>(
+                    "SELECT * FROM fnc_get_incidental_transaction_types()", new { }
+                )).ToList();
+
+                if (transactions == null || transactions.Count == 0)
+                {
+                    return new List<TransactionType> { new TransactionType() };
+                }
+
+                return transactions;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<TransactionType> { new TransactionType() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncidentalTransactionTypes: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<TransactionType> { new TransactionType() };
+            }
+        }
+
+
+        public async Task<IEnumerable<Category>> GetIncidentalCategories()
+        {
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+                var categories = (await connection.QueryAsync<Category>(
+                    "SELECT * FROM fnc_get_incidental_categories()", new { }
+                ))?.ToList();
+
+                if (categories == null || categories.Count == 0)
+                {
+                    return new List<Category> { new() };
+                }
+
+                return categories;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<Category> { new() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncidentalCategories: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<Category> { new() };
+            }
+        }
+
 
         public async Task<IEnumerable<Category>> GetCategoriesByTransactionId(int transactionId)
         {
@@ -441,54 +490,12 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in GetCategoriesByTransactionId: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<Category> { new Category() };
             }
         }
 
-
-        public async Task<(int, int)> GetLatestAvailableLedger()
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                string sql = "SELECT * FROM fnc_get_latest_available_ledger()";
-
-                await using var command = new NpgsqlCommand(sql, connection);
-                await using var reader = await command.ExecuteReaderAsync();
-
-                if (await reader.ReadAsync())
-                {
-                    int month = reader.GetInt32(0);
-                    int year = reader.GetInt32(1);
-
-                    return (month, year);
-                }
-                else
-                {
-                    return (0, 0);
-                }
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return (0, 0);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return (0, 0);
-            }
-
-        }
 
         public async Task<bool> UpdateIncidentalItem(IncidentalItem item, int month, int year)
         {
@@ -530,7 +537,44 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in UpdateRecurringItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateIncidentalItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+
+        public async Task<bool> DeleteIncidentalItem(int itemId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    itemId = itemId
+                };
+
+                await connection.ExecuteAsync(
+                    "CALL spw_delete_incidental_item(@itemId)",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in DeleteIncidentalItem: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }
