@@ -1,32 +1,27 @@
 ﻿using Dapper;
+using home_manager.Areas.BudgetManager.Models;
+using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
-using home_manager.Data;
-using home_manager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using System.Data.Common;
 using System.Diagnostics;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-    /// <summary>
-    /// Controller for managing recurring expenses in the Budget Manager area.
-    /// Handles CRUD operations for recurring expense items and their categories.
-    /// </summary>
+
     [Area("BudgetManager")]
     [Authorize]
     public class RecurringExpensesController : Controller
     {
-        private readonly DbConnectionService _dbConnection;
+        private readonly IBudgetManagerRepository _repository;
 
         /// <summary>
         /// Initializes a new instance of the RecurringExpensesController.
         /// </summary>
         /// <param name="configuration">The application configuration containing connection strings.</param>
-        public RecurringExpensesController(DbConnectionService dbConnection)
+        public RecurringExpensesController(IBudgetManagerRepository repository)
         {
-            _dbConnection = dbConnection;
+            _repository = repository;
         }
 
         /// <summary>
@@ -38,13 +33,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
         /// </returns>
         public async Task<IActionResult> Index()
         {
-            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-            {
-                return BadRequest("Database connection string is not configured.");
-            }
-
-            var model = new RecurringCategoryFilterItems_VModel(_dbConnection); // Pass the required 'dbConnection' parameter
-            await model.LoadRecurringCategoryFilterItems();
+            var model = new RecurringCategoryFilterItems_VModel();
+            model.Categories = (await _repository.GetRecurringCategoryFilterItems()).ToList();
             return View(model);
         }
 
@@ -60,123 +50,100 @@ namespace home_manager.Areas.BudgetManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetRecurringExpensesTable(int categoryId)
         {
-            try
-            {
-                var model = new RecurringItems_VModel(_dbConnection);
+            var model = new RecurringItems_VModel();
+            model.Items = (await _repository.GetRecurringItemsByCategoryId(categoryId)).ToList();
+            var categories = (await _repository.GetRecurringCategoryFilterItems()).ToList();
+            model.CategoryNames = categories.ToDictionary(c => c.Id, c => c.Description);
+            model.CalculateTotals();
 
-                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-                {
-                    return BadRequest("Database connection string is not configured.");
-                }
-
-                await model.LoadRecurringItemsAsync(categoryId);
-                return PartialView("_RecurringExpensesTable", model);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error loading recurring expenses: {ex.Message}");
-            }
+            return PartialView("_RecurringExpensesTable", model);
         }
 
-        /// <summary>
-        /// Loads the modify modal partial view for editing a recurring expense item.
-        /// </summary>
-        /// <param name="itemId">The ID of the recurring expense item to edit.</param>
-        /// <returns>
-        /// Returns a partial view containing the modal form for editing the specified item.
-        /// Returns BadRequest if the connection string is not configured.
-        /// </returns>
+        ///// <summary>
+        ///// Loads the modify modal partial view for editing a recurring expense item.
+        ///// </summary>
+        ///// <param name="itemId">The ID of the recurring expense item to edit.</param>
+        ///// <returns>
+        ///// Returns a partial view containing the modal form for editing the specified item.
+        ///// Returns BadRequest if the connection string is not configured.
+        ///// </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoadModifyModal(int itemId)
         {
-            if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
+            var model = new ModifyItemCombinedViewModel()
             {
-                return BadRequest("Database connection string is not configured.");
-            }
-
-            var model = new ModifyItemCombinedViewModel(_dbConnection)
-            {
-                ModifyItem = new ModifyItem_VModel(_dbConnection) { Item = new ModifyItem_VModel.RecItem() },
-                Categories = new RecurringCategoryFilterItems_VModel(_dbConnection)
+                ModifyItem = new ModifyItem_VModel() { Item = await _repository.GetRecurringItemById(itemId) },
+                Categories = new RecurringCategoryFilterItems_VModel() { Categories = (await _repository.GetRecurringCategoryFilterItems()).ToList() }
             };
-            Debug.WriteLine($"Item ID: {itemId}");
-            await model.ModifyItem.LoadItem(itemId);
-            await model.Categories.LoadRecurringCategoryFilterItems();
 
             return PartialView("_ModifyModal", model);
         }
 
-        /// <summary>
-        /// Updates an existing recurring expense item with the provided data.
-        /// </summary>
-        /// <param name="item">The recurring item data containing the updates.</param>
-        /// <returns>
-        /// Returns a JSON result indicating success and the category ID for table refresh.
-        /// Returns BadRequest if validation fails or if an error occurs during update.
-        /// </returns>
-        /// <remarks>
-        /// The method handles null values for Balance and InterestRate by converting 0 to null.
-        /// InterestRate is converted from percentage to decimal format before storage.
-        /// </remarks>
+        ///// <summary>
+        ///// Updates an existing recurring expense item with the provided data.
+        ///// </summary>
+        ///// <param name="item">The recurring item data containing the updates.</param>
+        ///// <returns>
+        ///// Returns a JSON result indicating success and the category ID for table refresh.
+        ///// Returns BadRequest if validation fails or if an error occurs during update.
+        ///// </returns>
+        ///// <remarks>
+        ///// The method handles null values for Balance and InterestRate by converting 0 to null.
+        ///// InterestRate is converted from percentage to decimal format before storage.
+        ///// </remarks>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateRecurringItem([FromBody] ModifyItem_VModel.RecItem item)
+        public async Task<IActionResult> UpdateRecurringItem([FromBody] RecurringItem item)
         {
             try
             {
-                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
-                {
-                    return BadRequest("Database connection string is not configured.");
-                }
-
                 // Validate required fields
                 if (item == null)
                     return BadRequest("No data provided");
                 if (string.IsNullOrWhiteSpace(item.Name))
                     return BadRequest("Name is required");
-                if (item.CategoryId == 0)
+                if (item.Category_catId == 0)
                     return BadRequest("Category is required");
                 if (item.MinimumDue < 0)
                     return BadRequest("Minimum Due cannot be negative");
 
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
+                // Map the view model to domain model
+                var recurringItem = new RecurringItem
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Description = item.Description,
+                    Category_catId = item.Category_catId,
+                    MinimumDue = item.MinimumDue,
+                    Balance = item.Balance,
+                    InterestRate = item.InterestRate,
+                    Day = item.Day,
+                    Jan = item.Jan,
+                    Feb = item.Feb,
+                    Mar = item.Mar,
+                    Apr = item.Apr,
+                    May = item.May,
+                    Jun = item.Jun,
+                    Jul = item.Jul,
+                    Aug = item.Aug,
+                    Sep = item.Sep,
+                    Oct = item.Oct,
+                    Nov = item.Nov,
+                    Dec = item.Dec,
+                    PaidOff = item.PaidOff
+                };
 
-                await connection.ExecuteAsync(
-                    "CALL spw_update_recurring_item(@id, @name, @description, @categoryId, @minimumDue, @balance, @interestRate, @dayOfMonth, " +
-                    "@january, @february, @march, @april, @may, @june, @july, @august, @september, @october, @november, @december, @paidOff)",
-                    new
-                    {
-                        id = item.Id,
-                        name = item.Name.Trim(),
-                        description = string.IsNullOrWhiteSpace(item.Description) ? null : item.Description.Trim(),
-                        categoryId = item.CategoryId,
-                        minimumDue = item.MinimumDue,
-                        balance = item.Balance.HasValue && item.Balance.Value != 0 ? item.Balance : null,
-                        interestRate = item.InterestRate.HasValue && item.InterestRate.Value != 0 ?
-                            (decimal?)(item.InterestRate.Value / 100) : null,
-                        dayOfMonth = item.DayOfMonth,
-                        january = item.January,
-                        february = item.February,
-                        march = item.March,
-                        april = item.April,
-                        may = item.May,
-                        june = item.June,
-                        july = item.July,
-                        august = item.August,
-                        september = item.September,
-                        october = item.October,
-                        november = item.November,
-                        december = item.December,
-                        paidOff = item.PaidOff
-                    });
+                var success = await _repository.UpdateRecurringItem(recurringItem);
 
-                return Json(new { success = true, categoryId = item.CategoryId });
-            }
-            catch (PostgresException pex)
-            {
-                return BadRequest($"Database error: {pex.MessageText}");
+                if (success)
+                {
+                    return Json(new { success = true, categoryId = item.Category_catId });
+                }
+                else
+                {
+                    return BadRequest("Failed to update recurring item");
+                }
             }
             catch (Exception ex)
             {
@@ -190,18 +157,16 @@ namespace home_manager.Areas.BudgetManager.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(_dbConnection.GetConnectionString()))
+                var success = await _repository.DeleteRecurringItem(itemId);
+
+                if (success)
                 {
-                    return BadRequest("Database connection string is not configured.");
+                    return Json(new { success = true });
                 }
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-                await connection.ExecuteAsync("CALL spw_delete_recurring_item(@itemId)", new { itemId });
-                return Json(new { success = true });
-            }
-            catch (PostgresException pex)
-            {
-                return BadRequest($"Database error: {pex.MessageText}");
+                else
+                {
+                    return BadRequest("Failed to delete recurring item");
+                }
             }
             catch (Exception ex)
             {

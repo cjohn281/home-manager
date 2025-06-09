@@ -6,58 +6,28 @@ using System.ComponentModel.DataAnnotations;
 
 namespace home_manager.Areas.BudgetManager.ViewModels
 {
-    public class Ledger_VModel
+    public class LedgerItem_VModel
     {
-        private readonly DbConnectionService _dbConnection;
-
-        public Ledger_VModel(DbConnectionService dbConnection)
-        {
-            _dbConnection = dbConnection;
-        }
+        public int Id { get; set; } = 0;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; } = 0.0M;
+        public int TransactionType_tstId { get; set; } = 0;
+        public string TransactionTypeName { get; set; } = string.Empty;
+        public int Category_catId { get; set; } = 0;
+        public string CategoryName { get; set; } = string.Empty;
+        public DateTime Date { get; set; } = DateTime.Now;
+        public bool IsPaid { get; set; } = true;
+        public string ItemType { get; set; } = string.Empty;
     }
 
     public class AvailableLedgerDropdown_VModel
     {
-        private readonly DbConnectionService _dbConnection;
 
-        public AvailableLedgerDropdown_VModel(DbConnectionService dbConnection)
-        {
-            _dbConnection = dbConnection;
-        }
+        public (int month, int year) LatestAvailableLedger { get; set; }
 
         public List<int> LedgerMonths { get; set; } = new();
 
         public List<int> LedgerYears { get; set; } = new();
-
-        public async Task LoadAvailableLedgerDropdowns()
-        {
-            using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-            await connection.OpenAsync();
-            var months = (await connection.QueryAsync<int>(
-                "SELECT * FROM fnc_get_available_ledger_months()", new { }
-            ))?.ToList();
-
-            var years = (await connection.QueryAsync<int>(
-                "SELECT * FROM fnc_get_available_ledger_years()", new { }
-            ))?.ToList();
-
-            if (months == null || months.Count == 0)
-            {
-                LedgerMonths = new List<int> { 0 };
-            }
-            else
-            {
-                LedgerMonths = months;
-            }
-
-            if (years == null || years.Count == 0)
-            {
-                LedgerYears = new List<int> { 0 };
-            }
-            else
-            {
-                LedgerYears = years;
-            }
-        }
     }
 }

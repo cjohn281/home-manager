@@ -1,0 +1,225 @@
+﻿@using home_manager.Helpers
+@{
+    ViewData["Title"] = "Ledger";
+}
+@model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel
+
+<style>
+    /* Remove spinner controls from number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .container {
+        max-width: 95vw !important;
+        margin: 0 auto;
+        padding: 0 10px;
+    }
+
+    .card {
+        width: 100%;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1rem 0.5rem;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+        .table td, .table th {
+            padding: 0.5rem 0.25rem;
+        }
+
+    #filter-container {
+        display: flex;
+        justify-content: start;
+        align-items: end;
+        width: auto;
+    }
+</style>
+
+<div class="container">
+    <h2 class="mb-4">Ledger</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <input type="hidden" id="edit-item" name="edit-item" value="0" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group" id="filter-container">
+                        <div class="col-md-3">
+                            <label for="monthFilter" class="form-label">Month</label>
+                            <select id="monthFilter" class="form-select" onchange="refreshLedgerTable()">
+                                @foreach (var month in Model.LedgerMonths)
+                                {
+                                    <option value="@month"
+                                            selected="@Model.LatestAvailableLedger.month">@(DropdownHelper.MonthDropdownOptions[month])</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 ms-2">
+                            <label for="yearFilter" class="form-label">Year</label>
+                            <select id="yearFilter" class="form-select" onchange="refreshLedgerTable()">
+                                @foreach (var year in Model.LedgerYears)
+                                {
+                                    <option value="@year"
+                                            selected="@Model.LatestAvailableLedger.year">@year</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <input type="hidden" id="currentMonthId" value="@DateTime.Now.Month" />
+            <input type="hidden" id="currentYearId" value="@DateTime.Now.Year" />
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="1%"></th>
+                            <th>Expense</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Paid</th>
+                            <th>Checking Amount</th>
+                            <th>Checking Balance</th>
+                            <th>Savings Amount</th>
+                            <th>Savings Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="_LedgerTable">
+                        <!-- Ledger Table content will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadLedgerTable();
+        });
+
+        function loadLedgerTable() {
+            poster.on();
+
+            const ledgerMonth = $('#monthFilter').val();
+            const ledgerYear = $('#yearFilter').val();
+
+            $.ajax({
+                url: '@Url.Action("GetLedgerTable", "Ledger", new { area = "BudgetManager" })',
+                type: 'POST',
+                data: { month: ledgerMonth, year: ledgerYear, editableId: parseInt($('#edit-item').val()) },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(data) {
+                    $('#_LedgerTable').html(data);
+                },
+                error: function (xhr, status, errror) {
+                    console.error('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
+                },
+                complete: function() {
+                    poster.off();
+                }
+            });
+        }
+
+        function enableEditMode(itemId) {
+            $('#edit-item').val(itemId);
+            loadLedgerTable();
+        }
+
+        function refreshLedgerTable() {
+            $('#edit-item').val('0');
+            loadLedgerTable();
+        }
+
+        function pad2(n) { return n < 10 ? '0' + n : n; }
+
+        function setDateInputRange() {
+            const month = parseInt($('#monthFilter').val());
+            const year = parseInt($('#yearFilter').val());
+            if (!month || !year) return;
+
+            // First day of month
+            const minDate = `${year}-${pad2(month)}-01`;
+            // Last day of month
+            const lastDay = new Date(year, month, 0).getDate();
+            const maxDate = `${year}-${pad2(month)}-${pad2(lastDay)}`;
+
+            $('#newDate').attr('min', minDate).attr('max', maxDate);
+
+            // If current value is outside the range, reset to min
+            const current = $('#newDate').val();
+            if (current < minDate || current > maxDate) {
+                $('#newDate').val(minDate);
+            }
+        }
+
+        function saveItem(ledger_item) {
+            const amount = parseFloat($('#newAmount').val()) || 0;
+            const formattedAmount = (Math.abs(amount) * -1);
+
+            const itemId = $(ledger_item).attr("id").split('-')[1];
+
+            const month = parseInt($('#monthFilter').val()) || 0;
+            const year = parseInt($('#yearFilter').val()) || 0;
+
+            // Get form data from the dynamic row
+            const payload = {
+                id: parseInt(itemId),
+                amount: formattedAmount,
+                isPaid: document.querySelector('[id="newPaid"]').checked,
+                date: $('#newDate').val()
+            };
+            
+            if (payload.Amount === 0) {
+                alert('Amount is required');
+                return;
+            }
+
+
+            poster.on("Saving");
+            $.ajax({
+                url: '@Url.Action("UpdateLedgerItem", "Ledger", new { area = "BudgetManager" })',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        refreshLedgerTable();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
+                },
+                complete: function() {
+                    poster.off();
+                }
+            });
+        }
+    </script>
+}

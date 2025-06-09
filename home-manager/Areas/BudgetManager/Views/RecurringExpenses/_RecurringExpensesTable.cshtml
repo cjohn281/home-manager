@@ -64,25 +64,25 @@
                     @item.Name
                 }
             </td>
-            <td>@(item.CategoryName ?? "Uncategorized")</td>
+            <td>@Model.GetCategoryName(item)</td>
             <td class="text-end">@FormatHelper.FormatCurrency(item.MinimumDue)
             </td>
             <td class="text-end">@(item.Balance.HasValue? FormatHelper.FormatCurrency(item.Balance.Value) : "-")</td>
             <td class="text-end">@(item.InterestRate.HasValue ? $"{(item.InterestRate * 100):F2}%" : "-")</td>
             <td></td>
-            <td class="text-center">@item.DayOfMonth</td>
-            <td class="text-center"><input type="checkbox" disabled @(item.January ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.February ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.March ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.April ? "checked" : "")></td>
+            <td class="text-center">@item.Day</td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Jan ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Feb ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Mar ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Apr ? "checked" : "")></td>
             <td class="text-center"><input type="checkbox" disabled @(item.May ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.June ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.July ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.August ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.September ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.October ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.November ? "checked" : "")></td>
-            <td class="text-center"><input type="checkbox" disabled @(item.December ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Jun ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Jul ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Aug ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Sep ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Oct ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Nov ? "checked" : "")></td>
+            <td class="text-center"><input type="checkbox" disabled @(item.Dec ? "checked" : "")></td>
             <td class="text-center"><input type="checkbox" disabled @(item.PaidOff ? "checked" : "")></td>
         </tr>
     }

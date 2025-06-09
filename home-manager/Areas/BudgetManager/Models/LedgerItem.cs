@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace home_manager.Models
+namespace home_manager.Areas.BudgetManager.Models
 {
     [Table("tbl_ledger_item")]
     public class LedgerItem
@@ -13,7 +13,7 @@ namespace home_manager.Models
         public int Ledger_ldgID { get; set; }
 
         [Required, Column("lgi_is_recurring")]
-        public Boolean IsRecurring { get; set; }
+        public bool IsRecurring { get; set; }
 
         [Column("lgi_recurring_item_rci_id")]
         public int RecurringItem_rciID { get; set; }
@@ -25,18 +25,6 @@ namespace home_manager.Models
         public float Amount { get; set; }
 
         [Required, Column("lgi_is_paid")]
-        public Boolean IsPaid { get; set; }
-
-        [Column("lgi_date_created")]
-        public DateTime DateCreated { get; set; }
-
-        [Column("lgi_created_by_prn_id")]
-        public int CreatedBy_prnID { get; set; }
-
-        [Column("lgi_date_modified")]
-        public DateTime DateModified { get; set; }
-
-        [Column("lgi_modified_by_prn_id")]
-        public int ModifiedBy_prnID { get; set; }
+        public bool IsPaid { get; set; }
     }
 }

@@ -55,9 +55,9 @@
                             <label for="categoryFilter" class="form-label">Filter by Category</label>
                             <select id="categoryFilter" class="form-select" onchange="loadRecurringExpensesTable(this.value)">
                                 <option value="0">All Categories</option>
-                                @foreach (var category in Model.Items)
+                                @foreach (var category in Model.Categories)
                                 {
-                                    <option value="@category.CategoryId">@category.CategoryName</option>
+                                    <option value="@category.Id">@category.Description</option>
                                 }
                             </select>
                         </div>
@@ -191,7 +191,6 @@
         function editRecurringItem(recurring_item) {
             // Extract item ID from the element
             const itemId = $(recurring_item).attr("id").split('-')[1];
-            console.log(itemId);
             if(isNumeric(itemId)){
                 loadModifyModal(itemId);
             } else {
