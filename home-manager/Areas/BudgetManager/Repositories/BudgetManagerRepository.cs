@@ -1,7 +1,10 @@
 ﻿using Dapper;
 using home_manager.Areas.BudgetManager.Models;
+using home_manager.Areas.BudgetManager.ViewModels;
 using home_manager.Data;
 using Npgsql;
+using System.Data;
+using static home_manager.Helpers.DropdownHelper;
 
 namespace home_manager.Areas.BudgetManager.Repositories
 {
@@ -94,6 +97,135 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 return new List<int> { 0 };
             }
 
+        }
+
+
+        public async Task<IEnumerable<LedgerItem_VModel>> GetLedgerItemsByMonth(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    month = month,
+                    year = year
+                };
+
+                var ledgerItems = (await connection.QueryAsync<LedgerItem_VModel>(
+                    "SELECT * FROM fnc_get_ledger_items_by_month(@month, @year)", parameters
+                ))?.ToList();
+
+                if (ledgerItems == null || ledgerItems.Count == 0)
+                {
+                    return new List<LedgerItem_VModel> { new LedgerItem_VModel() };
+                }
+
+                return ledgerItems;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<LedgerItem_VModel> { new LedgerItem_VModel() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetLedgerItems: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<LedgerItem_VModel> { new LedgerItem_VModel() };
+            }
+        }
+
+
+        public async Task<(decimal, decimal)> GetStartingBalances(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                string sql = "SELECT * FROM fnc_get_starting_balances_by_month(@month, @year)";
+
+                await using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("month", NpgsqlTypes.NpgsqlDbType.Integer, month);
+                command.Parameters.AddWithValue("year", NpgsqlTypes.NpgsqlDbType.Integer, year);
+
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    decimal checkingStartingBalance = reader.GetDecimal(0);
+                    decimal savingsStartingBalance = reader.GetDecimal(1);
+
+                    return (checkingStartingBalance, savingsStartingBalance);
+                }
+                else
+                {
+                    return (0, 0);
+                }
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return (0, 0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetStartingBalances: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return (0, 0);
+            }
+
+        }
+
+
+        public async Task<bool> UpdateLedgerItem(int id, decimal amount, bool isPaid, DateTime date)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("id", id, DbType.Int32);
+                parameters.Add("amount", amount, DbType.Decimal);
+                parameters.Add("isPaid", isPaid, DbType.Boolean);
+                parameters.Add("date", date, DbType.Date);
+                
+
+                var result = await connection.ExecuteAsync(
+                    @"CALL spw_update_ledger_item(
+                    @id, @amount, @isPaid, @date
+                    )",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateLedgerItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
         }
 
 
@@ -512,6 +644,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
                     description = item.Description,
                     date = item.Date,
                     amount = item.Amount,
+                    paid = item.IsPaid,
                     catId = item.Category_catID,
                     month = month,
                     year = year
@@ -519,7 +652,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
 
                 var result = await connection.ExecuteAsync(
                     @"CALL spw_update_incidental_item(
-                    @id, @incId, @name, @description, @date, @amount, @catId, @month, @year
+                    @id, @incId, @name, @description, @date, @amount, @paid, @catId, @month, @year
                     )",
                     parameters
                 );

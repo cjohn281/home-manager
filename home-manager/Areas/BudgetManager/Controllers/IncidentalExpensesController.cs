@@ -47,8 +47,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
             model.EditableItemId = editableId;
             model.CalculateTotals();
 
-            Debug.WriteLine($"CategoryName: {model.Items[0].CategoryName}");
-
             return PartialView("_IncidentalExpensesTable", model);
         }
 
@@ -71,10 +69,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
             var model = dto.Model;
             var month = dto.Month;
             var year = dto.Year;
-
-            Debug.WriteLine(month.ToString());
-            Debug.WriteLine(year.ToString());
-            Debug.WriteLine(model.Name);
 
             if (model == null)
                 return BadRequest("No data provided.");
@@ -112,8 +106,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
             try
             {
                 var success = await _repository.DeleteIncidentalItem(itemId);
-
-                Debug.WriteLine($"Item ID: {itemId}");
 
                 if (success)
                 {

@@ -191,7 +191,6 @@
         function editRecurringItem(recurring_item) {
             // Extract item ID from the element
             const itemId = $(recurring_item).attr("id").split('-')[1];
-            console.log(itemId);
             if(isNumeric(itemId)){
                 loadModifyModal(itemId);
             } else {

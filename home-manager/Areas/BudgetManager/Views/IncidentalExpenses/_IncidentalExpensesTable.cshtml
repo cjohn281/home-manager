@@ -1,12 +1,11 @@
 ﻿@using home_manager.Helpers;
-@using System.Diagnostics;
 @model home_manager.Areas.BudgetManager.ViewModels.IncidentalItems_VModel;
 
 
 @if (Model.Items[0].Id == 0)
 {
     <tr>
-        <td colspan="8" style="align-self:center; color:orangered;">There are no incidental items yet!</td>
+        <td colspan="9" style="align-self:center; color:orangered;">There are no incidental items yet!</td>
     </tr>
 } else {
     <tr>
@@ -14,14 +13,14 @@
         <td></td>
         <td></td>
         <td></td>
-        <td><strong>@FormatHelper.FormatCurrency(Model.TotalAmount)</strong></td>
+        <td></td>
+        <td><strong>@FormatHelper.FormatCurrency(Math.Abs(Model.TotalAmount))</strong></td>
         <td></td>
         <td></td>
         <td></td>
     </tr>
     @foreach (var item in Model.Items)
     {
-        Debug.WriteLine($"This is the transaction type name: {item.TransactionTypeName}");
         @if(item.Id == Model.EditableItemId)
         {
             <td>
@@ -41,6 +40,7 @@
                     </svg>
                 </button>
             </td>
+            <td class="text-center"><input id="newPaid" type="checkbox" @(item.IsPaid ? "checked" : "") /></td>
             <td>
                 <input type="date"
                        id="newDate"
@@ -108,9 +108,10 @@
                         <span class="visually-hidden">Button</span>
                     </button>
                 </td>
+                <td class="text-center"><input type="checkbox" disabled @(item.IsPaid ? "checked" : "") /></td>
                 <td>@item.Date.ToShortDateString()</td> //date
                 <td>@item.Name</td> //expense
-                <td>@FormatHelper.FormatCurrency(item.Amount)</td> //amount
+                <td>@FormatHelper.FormatCurrency(Math.Abs(item.Amount))</td> //amount
                 <td>@item.Description</td> //description
                 <td>@item.TransactionTypeName</td>
                 <td>@item.CategoryName</td> //category name
@@ -130,6 +131,7 @@
                 </svg>
             </button>
         </td>
+        <td class="text-center"><input id="newPaid" type="checkbox" checked /></td>
         <td>
             <input type="date"
                 id="newDate"

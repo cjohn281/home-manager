@@ -91,6 +91,7 @@
                         <tr>  
                             <th width="1%"></th>
                             <th width="1%"></th>
+                            <th class="text-center" width="1%">Paid</th>
                             <th>Date</th>
                             <th width="20%">Expense</th>
                             <th width="10%">Amount</th>
@@ -179,7 +180,7 @@
 
         function saveItem(incidental_item) {  
             const amount = parseFloat($('#newAmount').val()) || 0;  
-            let formattedAmount = $('#categoryDropdown').text().trim() === "Receive" ? (Math.abs(amount) * -1) : Math.abs(amount);
+            const formattedAmount = $('#categoryDropdown').text().trim() !== "Receive" ? (Math.abs(amount) * -1) : Math.abs(amount);
 
             const itemId = $(incidental_item).attr("id").split('-')[1];
 
@@ -188,11 +189,12 @@
                 Id: parseInt(itemId),
                 Name: $('#newExpense').val()?.trim() ?? '',  
                 Description: $('#newDescription').val()?.trim() ?? '',  
-                Amount: formattedAmount,  
+                Amount: formattedAmount,
+                IsPaid: document.querySelector('[id="newPaid"]').checked,
                 Date: $('#newDate').val(),  
                 TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,  
                 Category_catId: parseInt($('#categoryDropdown').val()) || 0  
-            };  
+            };
 
             // Get selected month and year from dropdowns above the table  
             const month = parseInt($('#monthFilter').val()) || 0;  
@@ -292,7 +294,6 @@
 
         function enableEditMode(itemId) {
             $('#edit-item').val(itemId);
-            console.log($('#edit-item').val());
             loadIncidentalExpensesTable();
         }
 

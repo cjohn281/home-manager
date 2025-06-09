@@ -24,6 +24,9 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("ici_amount")]
         public decimal Amount { get; set; } = 0.0M;
 
+        [Column("ici_is_paid")]
+        public bool IsPaid { get; set; } = true;
+
         [Column("ici_category_cat_id")]
         public int Category_catID { get; set; } = 0;
 

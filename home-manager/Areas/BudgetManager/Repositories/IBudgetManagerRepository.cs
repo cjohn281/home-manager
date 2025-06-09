@@ -1,4 +1,5 @@
 ﻿using home_manager.Areas.BudgetManager.Models;
+using home_manager.Areas.BudgetManager.ViewModels;
 
 namespace home_manager.Areas.BudgetManager.Repositories
 {
@@ -7,6 +8,9 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<(int, int)> GetLatestAvailableLedger();
         Task<IEnumerable<int>> GetAvailableLedgerMonths();
         Task<IEnumerable<int>> GetAvailableLedgerYears();
+        Task<IEnumerable<LedgerItem_VModel>> GetLedgerItemsByMonth(int month, int year);
+        Task<(decimal, decimal)> GetStartingBalances(int month, int year);
+        Task<bool> UpdateLedgerItem(int id, decimal amount, bool isPaid, DateTime date);
 
 
         Task<IEnumerable<Category>> GetRecurringCategoryFilterItems();
