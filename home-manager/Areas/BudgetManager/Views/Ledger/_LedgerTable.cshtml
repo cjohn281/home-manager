@@ -14,12 +14,15 @@
     <td></td>
     <td></td>
     <th>@FormatHelper.FormatCurrency(Model.CheckingStartingBalance)</th>
-    <td></td>
-    <th>@FormatHelper.FormatCurrency(Model.SavingsStartingBalance)</th>
+    <td style="background-color: #e8f9ff;"></td>
+    <th style="background-color: #e8f9ff;">@FormatHelper.FormatCurrency(Model.SavingsStartingBalance)</th>
 </tr>
 @foreach (var item in Model.Items)
 {
-    <tr>
+    var rowColor = "";
+    if (item.TransactionType_tstId == 3) rowColor = "background-color: #e8f9ff;";
+    if (item.TransactionType_tstId == 5) rowColor = "background-color: #dbffe3;";
+    <tr style='@(rowColor)'>
         @if (item.TransactionType_tstId == 2)
         {
             if (item.Id == Model.EditableItemId)
@@ -82,19 +85,19 @@
             }
             else
             {
-                <td>@FormatHelper.FormatCurrency(item.Amount)</td>
+                <td style='@(item.Amount < 0 ? "color : red;" : ""))'>@FormatHelper.FormatCurrency(item.Amount)</td>
             }
             <td>@FormatHelper.FormatCurrency(runningCheckingTotal)</td>
-            <td></td>
-            <td></td>
+            <td style="background-color: #e8f9ff;"></td>
+            <td style="background-color: #e8f9ff;"></td>
         }
         else if (item.TransactionType_tstId == 3 && item.Category_catId != 22) // if transfer to or from savings
         {
             runningCheckingTotal -= item.Amount;
             runningSavingsTotal += item.Amount;
-            <td>@FormatHelper.FormatCurrency((item.Amount * -1))</td>
+            <td style='@(item.Amount * -1 < 0 ? "color : red;" : "")'>@FormatHelper.FormatCurrency((item.Amount * -1))</td>
             <td>@FormatHelper.FormatCurrency(runningCheckingTotal)</td>
-            <td>@FormatHelper.FormatCurrency(item.Amount)</td>
+            <td style='@(item.Amount < 0 ? "color : red;" : "")'>@FormatHelper.FormatCurrency(item.Amount)</td>
             <td>@FormatHelper.FormatCurrency(runningSavingsTotal)</td>
         }
         else // savings deposit
@@ -102,11 +105,22 @@
             runningSavingsTotal += item.Amount;
             <td></td>
             <td></td>
-            <td>@FormatHelper.FormatCurrency(item.Amount)</td>
+            <td style='@(item.Amount < 0 ? "color : red;" : "")'>@FormatHelper.FormatCurrency(item.Amount)</td>
             <td>@FormatHelper.FormatCurrency(runningSavingsTotal)</td>
         }
     </tr>
 }
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td><strong>@FormatHelper.FormatCurrency(runningCheckingTotal)</strong></td>
+    <td></td>
+    <td><strong>@FormatHelper.FormatCurrency(runningSavingsTotal)</strong></td>
+</tr>
 
 
 <script>
