@@ -14,7 +14,7 @@
         <td></td>
         <td></td>
         <td></td>
-        <td><strong>@FormatHelper.FormatCurrency(Math.Abs(Model.TotalAmount))</strong></td>
+        <td style='@(Model.TotalAmount < 0 ? "color : red;" : "")'><strong>@FormatHelper.FormatCurrency(Model.TotalAmount)</strong></td>
         <td></td>
         <td></td>
         <td></td>
@@ -111,7 +111,9 @@
                 <td class="text-center"><input type="checkbox" disabled @(item.IsPaid ? "checked" : "") /></td>
                 <td>@item.Date.ToShortDateString()</td> //date
                 <td>@item.Name</td> //expense
-                <td>@FormatHelper.FormatCurrency(Math.Abs(item.Amount))</td> //amount
+                <td style='@(item.Amount < 0 ? "color : red;" : "")'>
+                    @FormatHelper.FormatCurrency(item.Amount)
+                </td>
                 <td>@item.Description</td> //description
                 <td>@item.TransactionTypeName</td>
                 <td>@item.CategoryName</td> //category name
