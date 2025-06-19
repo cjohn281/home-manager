@@ -20,13 +20,25 @@ namespace home_manager.Areas.BudgetManager.Controllers
         }
 
 
-        public async Task<IActionResult> Index()
+        [HttpGet("Ledger/{month?}/{year?}")]
+
+        public async Task<IActionResult> Index(int? month = null, int? year = null)
         {
             var model = new AvailableLedgerDropdown_VModel();
 
-            model.LatestAvailableLedger = (await _repository.GetLatestAvailableLedger());
+            if (month == null || year == null)
+            {
+                model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+            }
+            else
+            {
+                model.SelectedLedger = (month.Value, year.Value);
+            }
+
             model.LedgerMonths = (await _repository.GetAvailableLedgerMonths()).ToList();
             model.LedgerYears = (await _repository.GetAvailableLedgerYears()).ToList();
+
+            Debug.WriteLine($"Month: {model.SelectedLedger.month}, year: {model.SelectedLedger.year}");
 
             return View(model);
         }

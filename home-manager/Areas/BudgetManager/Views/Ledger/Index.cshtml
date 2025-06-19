@@ -58,21 +58,41 @@
                     <div class="form-group" id="filter-container">
                         <div class="col-md-3">
                             <label for="monthFilter" class="form-label">Month</label>
-                            <select id="monthFilter" class="form-select" onchange="refreshLedgerTable()">
+                            <select id="monthFilter" class="form-select" onchange="resetPage()">
                                 @foreach (var month in Model.LedgerMonths)
                                 {
-                                    <option value="@month"
-                                            selected="@Model.LatestAvailableLedger.month">@(DropdownHelper.MonthDropdownOptions[month])</option>
+                                    if (Model.SelectedLedger.month == month)
+                                    {
+                                        <option value="@month" selected="selected">
+                                            @(DropdownHelper.MonthDropdownOptions[month])
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@month">
+                                            @(DropdownHelper.MonthDropdownOptions[month])
+                                        </option>
+                                    }
                                 }
                             </select>
                         </div>
                         <div class="col-md-3 ms-2">
                             <label for="yearFilter" class="form-label">Year</label>
-                            <select id="yearFilter" class="form-select" onchange="refreshLedgerTable()">
+                            <select id="yearFilter" class="form-select" onchange="resetPage()">
                                 @foreach (var year in Model.LedgerYears)
                                 {
-                                    <option value="@year"
-                                            selected="@Model.LatestAvailableLedger.year">@year</option>
+                                    if (Model.SelectedLedger.year == year)
+                                    {
+                                        <option value="@year" selected="selected">
+                                            @year
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@year">
+                                            @year
+                                        </option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -121,6 +141,9 @@
 
             const ledgerMonth = $('#monthFilter').val();
             const ledgerYear = $('#yearFilter').val();
+
+            console.log("month: " + ledgerMonth);
+            console.log("year: " + ledgerYear);
 
             $.ajax({
                 url: '@Url.Action("GetLedgerTable", "Ledger", new { area = "BudgetManager" })',
@@ -220,6 +243,26 @@
                     poster.off();
                 }
             });
+        }
+
+        function resetPage() {
+            var month = document.getElementById("monthFilter").value;
+            var year = document.getElementById("yearFilter").value;
+
+            // Construct the URL. Replace "YourControllerName" with the actual controller name.
+            var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
+
+            window.location.href = url;
+        }
+
+        function navigateToIncidentals() {
+            var month = document.getElementById("monthFilter").value;
+            var year = document.getElementById("yearFilter").value;
+
+            // Construct the URL. Replace "YourControllerName" with the actual controller name.
+            var url = '@Url.Action("Index", "IncidentalExpenses", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
+
+            window.location.href = url;
         }
     </script>
 }

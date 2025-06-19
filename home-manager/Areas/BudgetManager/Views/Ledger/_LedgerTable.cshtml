@@ -52,7 +52,14 @@
         {
             <td></td>
         }
-        <td>@item.Name</td>
+        @if (item.Name == "Incidentals")
+        {
+            <td><a href="javascript:void(0)" onclick="navigateToIncidentals()">@item.Name</a></td>
+        }
+        else
+        {
+            <td>@item.Name</td>
+        }
         <td>@item.Description</td>
         @if (item.TransactionType_tstId == 2 && item.Id == Model.EditableItemId)
         {   <td>
