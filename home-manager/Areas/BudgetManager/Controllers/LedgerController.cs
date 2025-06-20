@@ -21,7 +21,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
 
         [HttpGet("Ledger/{month?}/{year?}")]
-
         public async Task<IActionResult> Index(int? month = null, int? year = null)
         {
             var model = new AvailableLedgerDropdown_VModel();
@@ -57,6 +56,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
             return PartialView("_LedgerTable", model);
         }
 
+
         public async Task<IActionResult> UpdateLedgerItem([FromBody] LedgerItemDTO dto)
         {
             try
@@ -81,6 +81,19 @@ namespace home_manager.Areas.BudgetManager.Controllers
                 return BadRequest($"Error saving incidental expense: {ex.Message}");
             }
         }
+
+
+        public async Task<IActionResult> CreateNewLedger()
+        {
+
+            var latestLedger = await _repository.GetLatestAvailableLedger();
+
+            int newMonth = latestLedger.Item1 < 12 ? latestLedger.Item1++ : 1;
+            int newYear = newMonth == 1 ? latestLedger.Item2++ : latestLedger.Item2;
+
+            return RedirectToAction("Index");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
