@@ -5,6 +5,7 @@ using home_manager.Data;
 using Npgsql;
 using System.Data;
 using static home_manager.Helpers.DropdownHelper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace home_manager.Areas.BudgetManager.Repositories
 {
@@ -223,6 +224,208 @@ namespace home_manager.Areas.BudgetManager.Repositories
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"General Error in UpdateLedgerItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+
+        public async Task<IEnumerable<IncomeDetail>> GetIncomeDetails()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var incomeDetailItems = (await connection.QueryAsync<IncomeDetail>(
+                        "SELECT * FROM fnc_get_income_details()"
+                    ))?.ToList();
+
+                if (incomeDetailItems == null || incomeDetailItems.Count == 0)
+                {
+                    return new List<IncomeDetail> { new IncomeDetail() };
+                }
+
+                return incomeDetailItems;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<IncomeDetail> { new IncomeDetail() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncomeDetails: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<IncomeDetail> { new IncomeDetail() };
+            }
+        }
+
+
+        public async Task<DateTime> GetLatestPayDate(int prnId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    prnId = prnId
+                };
+
+                DateTime? latestPay = (await connection.QuerySingleOrDefaultAsync<DateTime?>(
+                    "SELECT * FROM fnc_get_latest_pay_date(@prnId)", parameters
+                ));
+
+                if (latestPay == null)
+                {
+                    return DateTime.Now;
+                }
+
+                return latestPay ?? DateTime.Now;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return DateTime.Now;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetLatestPayDate: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return DateTime.Now;
+            }
+        }
+
+
+        public async Task<bool> InsertNewLedger(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("month", month, DbType.Int32);
+                parameters.Add("year", year, DbType.Int32);
+
+
+                var result = await connection.ExecuteAsync(
+                    @"CALL spw_create_ledger(
+                    @month, @year
+                    )",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in InsertNewLedger: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+
+        public async Task<bool> UpdateIncomeLedgerItem(IncomeLedgerItem item)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("id", item.Id, DbType.Int32);
+                parameters.Add("prnId", item.Person_prnId, DbType.Int32);
+                parameters.Add("date", item.Date, DbType.Date);
+                parameters.Add("amount", item.Amount, DbType.Decimal);
+                parameters.Add("month", item.Month, DbType.Int32);
+                parameters.Add("year", item.Year, DbType.Int32);
+
+
+                var result = await connection.ExecuteAsync(
+                    @"CALL spw_update_income_ledger_item(
+                    @id, @prnId, @date, @amount, @month, @year
+                    )",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateIncomeLedgerItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+
+        public async Task<bool> UpdateSavingsLedgerItem(SavingsLedgerItem item)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("id", item.Id, DbType.Int32);
+                parameters.Add("lvlId", item.Lookupvalue_lvlId, DbType.Int32);
+                parameters.Add("date", item.Date, DbType.Date);
+                parameters.Add("amount", item.Amount, DbType.Decimal);
+                parameters.Add("month", item.Month, DbType.Int32);
+                parameters.Add("year", item.Year, DbType.Int32);
+
+
+                var result = await connection.ExecuteAsync(
+                    @"CALL spw_update_savings_ledger_item(
+                    @id, @lvlId, @date, @amount, @month, @year
+                    )",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in UpdateSavingsLedgerItem: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }

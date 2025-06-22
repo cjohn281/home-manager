@@ -14,7 +14,7 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("rci_description")]
         public string? Description { get; set; }
 
-        [Column("rci_category_cat_id")]
+        [Column("rci_lookup_value_lvl_id")]
         public int Category_catId { get; set; } = 10;
 
         [Column("rci_minimum_due")]

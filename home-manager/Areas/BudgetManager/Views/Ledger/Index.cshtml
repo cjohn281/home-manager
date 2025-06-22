@@ -96,6 +96,9 @@
                                 }
                             </select>
                         </div>
+                        <div class="col-md-3 ms-2">
+                            <a href="javascript:void(0)" onclick="createNewLedger()"><h6>Create Next Ledger</h6></a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -142,8 +145,6 @@
             const ledgerMonth = $('#monthFilter').val();
             const ledgerYear = $('#yearFilter').val();
 
-            console.log("month: " + ledgerMonth);
-            console.log("year: " + ledgerYear);
 
             $.ajax({
                 url: '@Url.Action("GetLedgerTable", "Ledger", new { area = "BudgetManager" })',
@@ -263,6 +264,33 @@
             var url = '@Url.Action("Index", "IncidentalExpenses", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
 
             window.location.href = url;
+        }
+
+        function createNewLedger() {
+            poster.on("Saving");
+            $.ajax({
+                url: '@Url.Action("CreateNewLedger", "Ledger", new { area = "BudgetManager" })',
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log(response.month, response.year);
+                        // window.location.href = response.redirectUrl;
+                        var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + response.month + "&year=" + response.year;
+
+                        window.location.href = url;
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
+                },
+                complete: function() {
+                    poster.off();
+                }
+            });
         }
     </script>
 }
