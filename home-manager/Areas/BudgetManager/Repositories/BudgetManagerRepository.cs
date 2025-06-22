@@ -143,14 +143,14 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
-        public async Task<(decimal, decimal)> GetStartingBalances(int month, int year)
+        public async Task<(decimal, decimal)> GetEndingBalances(int month, int year)
         {
             try
             {
                 using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
                 await connection.OpenAsync();
 
-                string sql = "SELECT * FROM fnc_get_starting_balances_by_month(@month, @year)";
+                string sql = "SELECT * FROM fnc_get_ending_balances_by_month(@month, @year)";
 
                 await using var command = new NpgsqlCommand(sql, connection);
                 command.Parameters.AddWithValue("month", NpgsqlTypes.NpgsqlDbType.Integer, month);
@@ -160,10 +160,10 @@ namespace home_manager.Areas.BudgetManager.Repositories
 
                 if (await reader.ReadAsync())
                 {
-                    decimal checkingStartingBalance = reader.GetDecimal(0);
-                    decimal savingsStartingBalance = reader.GetDecimal(1);
+                    decimal checkingEndingBalance = reader.GetDecimal(0);
+                    decimal savingsEndingBalance = reader.GetDecimal(1);
 
-                    return (checkingStartingBalance, savingsStartingBalance);
+                    return (checkingEndingBalance, savingsEndingBalance);
                 }
                 else
                 {
@@ -181,7 +181,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"General Error in GetStartingBalances: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"General Error in GetEndingBalances: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return (0, 0);
             }
@@ -243,7 +243,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
 
                 if (incomeDetailItems == null || incomeDetailItems.Count == 0)
                 {
-                    return new List<IncomeDetail> { new IncomeDetail() };
+                    return new List<IncomeDetail>();
                 }
 
                 return incomeDetailItems;
@@ -255,13 +255,49 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
                 System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
                 System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new List<IncomeDetail> { new IncomeDetail() };
+                return new List<IncomeDetail>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"General Error in GetIncomeDetails: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new List<IncomeDetail> { new IncomeDetail() };
+                return new List<IncomeDetail>();
+            }
+        }
+
+
+        public async Task<IEnumerable<RecurringSavingsTransferDetail>> GetRecurringSavingsTransferDetails()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var incomeRecurringSavingsItems = (await connection.QueryAsync<RecurringSavingsTransferDetail>(
+                        "SELECT * FROM fnc_get_recurring_savings_transfer_detail()"
+                    ))?.ToList();
+
+                if (incomeRecurringSavingsItems == null || incomeRecurringSavingsItems.Count == 0)
+                {
+                    return new List<RecurringSavingsTransferDetail>();
+                }
+
+                return incomeRecurringSavingsItems;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<RecurringSavingsTransferDetail>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetRecurringSavingsTransferDetails: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<RecurringSavingsTransferDetail>();
             }
         }
 
@@ -284,7 +320,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
 
                 if (latestPay == null)
                 {
-                    return DateTime.Now;
+                    return new DateTime(1970, 1, 1);
                 }
 
                 return latestPay ?? DateTime.Now;
@@ -296,13 +332,54 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
                 System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
                 System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return DateTime.Now;
+                return new DateTime(1970, 1, 1);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"General Error in GetLatestPayDate: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return DateTime.Now;
+                return new DateTime(1970, 1, 1);
+            }
+        }
+
+
+        public async Task<DateTime> GetLatestRecurringSavingsDate(int rsdId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    rsdId = rsdId
+                };
+
+                DateTime? latestPay = (await connection.QuerySingleOrDefaultAsync<DateTime?>(
+                    "SELECT * FROM fnc_get_latest_savings_transfer(@rsdId)", parameters
+                ));
+
+                if (latestPay == null)
+                {
+                    return new DateTime(1970, 1, 1);
+                }
+
+                return latestPay ?? DateTime.Now;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new DateTime(1970, 1, 1);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetLatestRecurringSavingsDate: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new DateTime(1970, 1, 1);
             }
         }
 
@@ -358,13 +435,14 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 parameters.Add("prnId", item.Person_prnId, DbType.Int32);
                 parameters.Add("date", item.Date, DbType.Date);
                 parameters.Add("amount", item.Amount, DbType.Decimal);
+                parameters.Add("paid", item.Paid, DbType.Boolean);
                 parameters.Add("month", item.Month, DbType.Int32);
                 parameters.Add("year", item.Year, DbType.Int32);
 
 
                 var result = await connection.ExecuteAsync(
                     @"CALL spw_update_income_ledger_item(
-                    @id, @prnId, @date, @amount, @month, @year
+                    @id, @prnId, @date, @amount, @paid, @month, @year
                     )",
                     parameters
                 );
@@ -401,13 +479,15 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 parameters.Add("lvlId", item.Lookupvalue_lvlId, DbType.Int32);
                 parameters.Add("date", item.Date, DbType.Date);
                 parameters.Add("amount", item.Amount, DbType.Decimal);
+                parameters.Add("paid", item.Paid, DbType.Boolean);
+                parameters.Add("recurringId", item.RecurringDetailId, DbType.Int32);
                 parameters.Add("month", item.Month, DbType.Int32);
                 parameters.Add("year", item.Year, DbType.Int32);
 
 
                 var result = await connection.ExecuteAsync(
                     @"CALL spw_update_savings_ledger_item(
-                    @id, @lvlId, @date, @amount, @month, @year
+                    @id, @lvlId, @date, @amount, @paid, @recurringId, @month, @year
                     )",
                     parameters
                 );

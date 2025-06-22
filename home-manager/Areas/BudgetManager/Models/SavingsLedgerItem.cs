@@ -17,6 +17,12 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("sli_amount")]
         public decimal Amount { get; set; } = 0.0M;
 
+        [Column("sli_paid")]
+        public bool Paid { get; set; } = false;
+
+        [Column("sli_recurring_rsd_id")]
+        public int RecurringDetailId { get; set; } = 0;
+
         public int Month { get; set; } = 0;
 
         public int Year { get; set; } = 0;

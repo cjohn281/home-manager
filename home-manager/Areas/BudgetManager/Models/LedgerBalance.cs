@@ -12,14 +12,8 @@ namespace home_manager.Areas.BudgetManager.Models
         [Required, Column("lbl_ledger_ldg_id")]
         public int Ledger_ldgID { get; set; }
 
-        [Required, Column("lbl_starting_checking_balance")]
-        public float StartingCheckingBalance { get; set; }
-
         [Column("lbl_ending_checking_balance")]
         public float EndingCheckingBalance { get; set; }
-
-        [Required, Column("lbl_starting_savings_balance")]
-        public float StartingSavingsBalance { get; set; }
 
         [Column("lbl_ending_savings_balance")]
         public float EndingSavingsBalance { get; set; }

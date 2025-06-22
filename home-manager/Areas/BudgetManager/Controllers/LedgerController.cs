@@ -47,9 +47,13 @@ namespace home_manager.Areas.BudgetManager.Controllers
             var model = new LedgerDTO();
 
             model.Items = (await _repository.GetLedgerItemsByMonth(month, year)).ToList();
-            var balances = (await _repository.GetStartingBalances(month, year));
-            model.CheckingStartingBalance = balances.Item1;
-            model.SavingsStartingBalance = balances.Item2;
+
+            var prevMonth = month == 1 ? 12 : --month;
+            var prevYear = month == 12 ? --year : year;
+
+            var balances = (await _repository.GetEndingBalances(prevMonth, prevYear));
+            model.PreviousCheckingEndingBalance = balances.Item1;
+            model.PreviousSavingsEndingBalance = balances.Item2;
             model.EditableItemId = editableId;
 
             return PartialView("_LedgerTable", model);
@@ -102,113 +106,24 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
             if (incomeDetailItems.Count > 0)
             {
-                List<IncomeLedgerItem> incomeLedgerItems = new List<IncomeLedgerItem>();
-                List<SavingsLedgerItem> savingsLedgerItems = new List<SavingsLedgerItem>();
-
-                foreach (var item in incomeDetailItems)
-                {
-                    // if monthly or bimonthly
-                    if (item.LookupValue_lvlId == 29 || item.LookupValue_lvlId == 30)
-                    {
-                        string newDateStr = $"{newMonth.ToString("D2")}/{(item.PayDate1.HasValue ? item.PayDate1.Value.ToString("D2") : "01")}/{newYear.ToString("D4")}";
-                        
-                        DateTime newDate;
-                        bool isValid = DateTime.TryParse(newDateStr, out newDate);
-
-                        if (isValid)
-                        {
-                            
-                            incomeLedgerItems.Add(new IncomeLedgerItem
-                            {
-                                Person_prnId = item.Person_prnId,
-                                Date = newDate,
-                                Amount = item.DefaultAmount,
-                                Month = newMonth,
-                                Year = newYear
-                            });
-                        }
-                    }
-
-                    // if bimonthly
-                    if (item.LookupValue_lvlId == 30)
-                    {
-                        int lastDay = DateTime.DaysInMonth(newYear, newMonth);
-                        string newDateStr;
-
-                        if (item.PayDate2 > lastDay)
-                        {
-                            newDateStr = $"{newMonth.ToString("D2")}/{lastDay.ToString("D2")}/{newYear.ToString("D4")}";
-                        }
-                        else
-                        {
-                            newDateStr = $"{newMonth.ToString("D2")}/{(item.PayDate2.HasValue ? item.PayDate2.Value.ToString("D2") : "01")}/{newYear.ToString("D4")}";
-                        }
-
-                        DateTime newDate;
-                        bool isValid = DateTime.TryParse(newDateStr, out newDate);
-
-                        if (isValid)
-                        {
-                            incomeLedgerItems.Add(new IncomeLedgerItem
-                            {
-                                Person_prnId = item.Person_prnId,
-                                Date = newDate,
-                                Amount = item.DefaultAmount,
-                                Month = newMonth,
-                                Year = newYear
-                            });
-                        }
-                    }
-
-                    if (item.LookupValue_lvlId == 31)
-                    {
-                        
-                        int lastDay = DateTime.DaysInMonth(newYear, newMonth);
-                        DateTime latestPayDate = await _repository.GetLatestPayDate(item.Person_prnId);
-
-                        DateTime newPayDate = latestPayDate.AddDays(14);
-
-                        while (newPayDate.Month == newMonth && newPayDate.Year == newYear)
-                        {
-                            incomeLedgerItems.Add(new IncomeLedgerItem
-                            {
-                                Person_prnId = item.Person_prnId,
-                                Date = newPayDate,
-                                Amount = item.DefaultAmount,
-                                Month = newMonth,
-                                Year = newYear
-                            });
-
-                            if (newPayDate.Day + 1 <= lastDay)
-                            {
-                                DateTime newSavingsDate = newPayDate.AddDays(1);
-
-                                savingsLedgerItems.Add(new SavingsLedgerItem
-                                {
-                                    Lookupvalue_lvlId = 23,
-                                    Date = newSavingsDate,
-                                    Amount = 125M,
-                                    Month = newMonth,
-                                    Year = newYear
-                                });
-                            }
-
-                            newPayDate = newPayDate.AddDays(14);
-                        }
-
-                    }
-                }
+                List<IncomeLedgerItem> incomeLedgerItems = await BuildIncomeLedgerItemsAsync(incomeDetailItems, newMonth, newYear);
 
                 foreach (var item in incomeLedgerItems)
                 {
                     await _repository.UpdateIncomeLedgerItem(item);
                 }
+            }
+
+            var recurringSavingsItems = (await _repository.GetRecurringSavingsTransferDetails()).ToList();
+
+            if (recurringSavingsItems.Count > 0)
+            {
+                List<SavingsLedgerItem> savingsLedgerItems = await BuildSavingsLedgerItemsAsync(recurringSavingsItems, newMonth, newYear);
 
                 foreach (var item in savingsLedgerItems)
                 {
                     await _repository.UpdateSavingsLedgerItem(item);
                 }
-
             }
 
             return Json(new
@@ -219,6 +134,150 @@ namespace home_manager.Areas.BudgetManager.Controllers
             });
 
 
+        }
+
+
+        private async Task<List<IncomeLedgerItem>> BuildIncomeLedgerItemsAsync(IEnumerable<IncomeDetail> incomeDetailItems, int newMonth, int newYear)
+        {
+            var incomeLedgerItems = new List<IncomeLedgerItem>();
+
+            foreach (var item in incomeDetailItems)
+            {
+                if (item.LookupValue_lvlId == 29 || item.LookupValue_lvlId == 30)
+                {
+                    string newDateStr = $"{newMonth:D2}/{(item.PayDate1?.ToString("D2") ?? "01")}/{newYear:D4}";
+
+                    if (DateTime.TryParse(newDateStr, out DateTime newDate))
+                    {
+                        incomeLedgerItems.Add(new IncomeLedgerItem
+                        {
+                            Person_prnId = item.Person_prnId,
+                            Date = newDate,
+                            Amount = item.DefaultAmount,
+                            Month = newMonth,
+                            Year = newYear
+                        });
+                    }
+                }
+
+                if (item.LookupValue_lvlId == 30)
+                {
+                    int lastDay = DateTime.DaysInMonth(newYear, newMonth);
+                    string newDateStr = $"{newMonth:D2}/{(item.PayDate2.HasValue ? Math.Min(item.PayDate2.Value, lastDay).ToString("D2") : "01")}/{newYear:D4}";
+
+                    if (DateTime.TryParse(newDateStr, out DateTime newDate))
+                    {
+                        incomeLedgerItems.Add(new IncomeLedgerItem
+                        {
+                            Person_prnId = item.Person_prnId,
+                            Date = newDate,
+                            Amount = item.DefaultAmount,
+                            Month = newMonth,
+                            Year = newYear
+                        });
+                    }
+                }
+
+                if (item.LookupValue_lvlId == 31)
+                {
+                    DateTime latestPayDate = await _repository.GetLatestPayDate(item.Person_prnId);
+                    DateTime newPayDate = latestPayDate.Year == 1970
+                        ? new DateTime(newYear, newMonth, 1)
+                        : latestPayDate.AddDays(14);
+
+                    while (newPayDate.Year < newYear || (newPayDate.Year == newYear && newPayDate.Month <= newMonth))
+                    {
+                        if (newPayDate.Month == newMonth && newPayDate.Year == newYear)
+                        {
+                            incomeLedgerItems.Add(new IncomeLedgerItem
+                            {
+                                Person_prnId = item.Person_prnId,
+                                Date = newPayDate,
+                                Amount = item.DefaultAmount,
+                                Month = newMonth,
+                                Year = newYear
+                            });
+                        }
+
+                        newPayDate = newPayDate.AddDays(14);
+                    }
+                }
+            }
+
+            return incomeLedgerItems;
+        }
+
+        private async Task<List<SavingsLedgerItem>> BuildSavingsLedgerItemsAsync(IEnumerable<RecurringSavingsTransferDetail> savingsDetailItems, int newMonth, int newYear)
+        {
+            var savingsLedgerItems = new List<SavingsLedgerItem>();
+
+            foreach (var item in savingsDetailItems)
+            {
+                if (item.Frequency_lvlId == 29 || item.Frequency_lvlId == 30)
+                {
+                    string newDateStr = $"{newMonth:D2}/{(item.Date1?.ToString("D2") ?? "01")}/{newYear:D4}";
+
+                    if (DateTime.TryParse(newDateStr, out DateTime newDate))
+                    {
+                        savingsLedgerItems.Add(new SavingsLedgerItem
+                        {
+                            Lookupvalue_lvlId = item.TransferType_lvlId,
+                            Date = newDate,
+                            Amount = item.Amount,
+                            RecurringDetailId = item.Id,
+                            Month = newMonth,
+                            Year = newYear
+                        });
+                    }
+                }
+
+                if (item.Frequency_lvlId == 30)
+                {
+                    int lastDay = DateTime.DaysInMonth(newYear, newMonth);
+                    string newDateStr = $"{newMonth:D2}/{(item.Date2.HasValue ? Math.Min(item.Date2.Value, lastDay).ToString("D2") : "01")}/{newYear:D4}";
+
+                    if (DateTime.TryParse(newDateStr, out DateTime newDate))
+                    {
+                        savingsLedgerItems.Add(new SavingsLedgerItem
+                        {
+                            Lookupvalue_lvlId = item.TransferType_lvlId,
+                            Date = newDate,
+                            Amount = item.Amount,
+                            RecurringDetailId = item.Id,
+                            Month = newMonth,
+                            Year = newYear
+                        });
+                    }
+                }
+
+                if (item.Frequency_lvlId == 31)
+                {
+                    DateTime latestDate = await _repository.GetLatestRecurringSavingsDate(item.Id);
+                    DateTime newDate = latestDate.Year == 1970
+                        ? new DateTime(newYear, newMonth, 1)
+                        : latestDate.AddDays(14);
+
+                    while (newDate.Year < newYear || (newDate.Year == newYear && newDate.Month <= newMonth))
+                    {
+                        if (newDate.Month == newMonth && newDate.Year == newYear)
+                        {
+                            savingsLedgerItems.Add(new SavingsLedgerItem
+                            {
+                                Lookupvalue_lvlId = item.TransferType_lvlId,
+                                Date = newDate,
+                                Amount = item.Amount,
+                                RecurringDetailId = item.Id,
+                                Month = newMonth,
+                                Year = newYear
+                            });
+                        }
+
+                        newDate = newDate.AddDays(14);
+                    }
+                }
+            }
+
+            return savingsLedgerItems;
         }
 
 

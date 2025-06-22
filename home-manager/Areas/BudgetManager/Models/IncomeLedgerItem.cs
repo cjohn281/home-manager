@@ -17,6 +17,9 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("ili_amount")]
         public decimal Amount { get; set; } = 0.0M;
 
+        [Column("ili_paid")]
+        public bool Paid { get; set; } = false;
+
         public int Month { get; set; } = 0;
 
         public int Year { get; set; } = 0;

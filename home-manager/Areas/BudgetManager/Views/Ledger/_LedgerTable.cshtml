@@ -2,8 +2,8 @@
 @model home_manager.Areas.BudgetManager.DTOs.LedgerDTO;
 
 @{
-    decimal runningCheckingTotal = Model.CheckingStartingBalance;
-    decimal runningSavingsTotal = Model.SavingsStartingBalance;
+    decimal runningCheckingTotal = Model.PreviousCheckingEndingBalance;
+    decimal runningSavingsTotal = Model.PreviousSavingsEndingBalance;
 }
 
 <tr>
@@ -13,9 +13,9 @@
     <td></td>
     <td></td>
     <td></td>
-    <th>@FormatHelper.FormatCurrency(Model.CheckingStartingBalance)</th>
+    <th>@FormatHelper.FormatCurrency(Model.PreviousCheckingEndingBalance)</th>
     <td style="background-color: #e8f9ff;"></td>
-    <th style="background-color: #e8f9ff;">@FormatHelper.FormatCurrency(Model.SavingsStartingBalance)</th>
+    <th style="background-color: #e8f9ff;">@FormatHelper.FormatCurrency(Model.PreviousSavingsEndingBalance)</th>
 </tr>
 @foreach (var item in Model.Items)
 {
