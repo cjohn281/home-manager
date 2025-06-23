@@ -230,42 +230,6 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
-        public async Task<IEnumerable<IncomeDetail>> GetIncomeDetails()
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                var incomeDetailItems = (await connection.QueryAsync<IncomeDetail>(
-                        "SELECT * FROM fnc_get_income_details()"
-                    ))?.ToList();
-
-                if (incomeDetailItems == null || incomeDetailItems.Count == 0)
-                {
-                    return new List<IncomeDetail>();
-                }
-
-                return incomeDetailItems;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new List<IncomeDetail>();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in GetIncomeDetails: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new List<IncomeDetail>();
-            }
-        }
-
-
         public async Task<IEnumerable<RecurringSavingsTransferDetail>> GetRecurringSavingsTransferDetails()
         {
             try
@@ -298,88 +262,6 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"General Error in GetRecurringSavingsTransferDetails: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<RecurringSavingsTransferDetail>();
-            }
-        }
-
-
-        public async Task<DateTime> GetLatestPayDate(int prnId)
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                var parameters = new
-                {
-                    prnId = prnId
-                };
-
-                DateTime? latestPay = (await connection.QuerySingleOrDefaultAsync<DateTime?>(
-                    "SELECT * FROM fnc_get_latest_pay_date(@prnId)", parameters
-                ));
-
-                if (latestPay == null)
-                {
-                    return new DateTime(1970, 1, 1);
-                }
-
-                return latestPay ?? DateTime.Now;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new DateTime(1970, 1, 1);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in GetLatestPayDate: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new DateTime(1970, 1, 1);
-            }
-        }
-
-
-        public async Task<DateTime> GetLatestRecurringSavingsDate(int rsdId)
-        {
-            try
-            {
-                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
-                await connection.OpenAsync();
-
-                var parameters = new
-                {
-                    rsdId = rsdId
-                };
-
-                DateTime? latestPay = (await connection.QuerySingleOrDefaultAsync<DateTime?>(
-                    "SELECT * FROM fnc_get_latest_savings_transfer(@rsdId)", parameters
-                ));
-
-                if (latestPay == null)
-                {
-                    return new DateTime(1970, 1, 1);
-                }
-
-                return latestPay ?? DateTime.Now;
-            }
-            catch (PostgresException pgEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
-                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
-                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
-                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
-                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
-                return new DateTime(1970, 1, 1);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"General Error in GetLatestRecurringSavingsDate: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return new DateTime(1970, 1, 1);
             }
         }
 
