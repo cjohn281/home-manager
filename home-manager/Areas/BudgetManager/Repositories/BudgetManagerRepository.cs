@@ -801,18 +801,18 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
                 await connection.OpenAsync();
 
-                var parameters = new
+                var parameters = new DynamicParameters();
                 {
-                    id = item.Id,
-                    incId = item.Incidental_incId,
-                    name = item.Name,
-                    description = item.Description,
-                    date = item.Date,
-                    amount = item.Amount,
-                    paid = item.IsPaid,
-                    catId = item.Category_catID,
-                    month = month,
-                    year = year
+                    parameters.Add("id", item.Id, DbType.Int32);
+                    parameters.Add("incId", item.Incidental_incId, DbType.Int32);
+                    parameters.Add("name", item.Name, DbType.String);
+                    parameters.Add("description", item.Description, DbType.String);
+                    parameters.Add("date", item.Date, DbType.Date);
+                    parameters.Add("amount", item.Amount, DbType.Decimal);
+                    parameters.Add("paid", item.IsPaid, DbType.Boolean);
+                    parameters.Add("catId", item.Category_catID, DbType.Int32);
+                    parameters.Add("month", month, DbType.Int32);
+                    parameters.Add("year", year, DbType.Int32);
                 };
 
                 var result = await connection.ExecuteAsync(
@@ -873,6 +873,127 @@ namespace home_manager.Areas.BudgetManager.Repositories
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"General Error in DeleteIncidentalItem: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+
+        public async Task<IEnumerable<IncomeLedgerItem>> GetIncomeLedgerItems(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    month = month,
+                    year = year
+                };
+
+                var items = (await connection.QueryAsync<IncomeLedgerItem>(
+                    "SELECT * FROM fnc_get_income_items_by_month(@month, @year)", parameters
+                ))?.ToList();
+
+                if (items == null || items.Count == 0)
+                {
+                    return new List<IncomeLedgerItem> { new IncomeLedgerItem() };
+                }
+
+                return items;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<IncomeLedgerItem> { new IncomeLedgerItem() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncomeLedgerItems: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<IncomeLedgerItem> { new IncomeLedgerItem() };
+            }
+        }
+
+
+        public async Task<IEnumerable<SavingsLedgerItem>> GetSavingsLedgerItems(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    month = month,
+                    year = year
+                };
+
+                var items = (await connection.QueryAsync<SavingsLedgerItem>(
+                    "SELECT * FROM fnc_get_savings_items_by_month(@month, @year)", parameters
+                ))?.ToList();
+
+                if (items == null || items.Count == 0)
+                {
+                    return new List<SavingsLedgerItem> { new SavingsLedgerItem() };
+                }
+
+                return items;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<SavingsLedgerItem> { new SavingsLedgerItem() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetSavingsLedgerItems: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<SavingsLedgerItem> { new SavingsLedgerItem() };
+            }
+        }
+
+
+        public async Task<bool> DeleteSavingsLedgerItem(int itemId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    itemId = itemId
+                };
+
+                await connection.ExecuteAsync(
+                    "CALL spw_delete_savings_ledger_item(@itemId)",
+                    parameters
+                );
+
+                return true;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in DeleteSavingsLedgerItem: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }

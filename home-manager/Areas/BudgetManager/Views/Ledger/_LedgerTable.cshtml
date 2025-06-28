@@ -52,9 +52,9 @@
         {
             <td></td>
         }
-        @if (item.Name == "Incidentals")
+        @if (item.Name == "Incidentals" || item.Name == "Payday" || item.Name == "Savings")
         {
-            <td><a href="javascript:void(0)" onclick="navigateToIncidentals()">@item.Name</a></td>
+            <td><a href="javascript:void(0)" onclick="navigateToOther('@item.Name')">@item.Name</a></td>
         }
         else
         {

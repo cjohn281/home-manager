@@ -11,6 +11,8 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("ili_person_prn_id")]
         public int Person_prnId { get; set; } = 0;
 
+        public string PersonName { get; set; } = string.Empty;
+
         [Column("ili_date")]
         public DateTime Date { get; set; } = DateTime.Now;
 

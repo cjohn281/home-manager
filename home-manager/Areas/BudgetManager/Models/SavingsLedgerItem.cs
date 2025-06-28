@@ -11,6 +11,8 @@ namespace home_manager.Areas.BudgetManager.Models
         [Column("sli_lookup_value_lvl_id")]
         public int Lookupvalue_lvlId { get; set; } = 23;
 
+        public string CategoryName { get; set; } = string.Empty;
+
         [Column("sli_date")]
         public DateTime Date { get; set; } = DateTime.Now;
 

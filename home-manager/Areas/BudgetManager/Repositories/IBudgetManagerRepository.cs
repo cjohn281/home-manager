@@ -32,5 +32,8 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<bool> DeleteIncidentalItem(int itemId);
 
 
+        Task<IEnumerable<IncomeLedgerItem>> GetIncomeLedgerItems(int month, int year);
+        Task<IEnumerable<SavingsLedgerItem>> GetSavingsLedgerItems(int month, int year);
+        Task<bool> DeleteSavingsLedgerItem(int itemId);
     }
 }
