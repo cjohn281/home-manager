@@ -29,5 +29,7 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         public List<int> LedgerMonths { get; set; } = new();
 
         public List<int> LedgerYears { get; set; } = new();
+
+        public bool isLatest { get; set; } = false;
     }
 }

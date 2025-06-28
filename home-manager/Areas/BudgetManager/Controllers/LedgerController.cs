@@ -1,4 +1,5 @@
 ﻿using home_manager.Areas.BudgetManager.DTOs;
+using home_manager.Areas.BudgetManager.Models;
 using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
 using home_manager.Models;
@@ -21,7 +22,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
 
         [HttpGet("Ledger/{month?}/{year?}")]
-
         public async Task<IActionResult> Index(int? month = null, int? year = null)
         {
             var model = new AvailableLedgerDropdown_VModel();
@@ -38,8 +38,6 @@ namespace home_manager.Areas.BudgetManager.Controllers
             model.LedgerMonths = (await _repository.GetAvailableLedgerMonths()).ToList();
             model.LedgerYears = (await _repository.GetAvailableLedgerYears()).ToList();
 
-            Debug.WriteLine($"Month: {model.SelectedLedger.month}, year: {model.SelectedLedger.year}");
-
             return View(model);
         }
 
@@ -49,13 +47,18 @@ namespace home_manager.Areas.BudgetManager.Controllers
             var model = new LedgerDTO();
 
             model.Items = (await _repository.GetLedgerItemsByMonth(month, year)).ToList();
-            var balances = (await _repository.GetStartingBalances(month, year));
-            model.CheckingStartingBalance = balances.Item1;
-            model.SavingsStartingBalance = balances.Item2;
+
+            var prevMonth = month == 1 ? 12 : --month;
+            var prevYear = month == 12 ? --year : year;
+
+            var balances = (await _repository.GetEndingBalances(prevMonth, prevYear));
+            model.PreviousCheckingEndingBalance = balances.Item1;
+            model.PreviousSavingsEndingBalance = balances.Item2;
             model.EditableItemId = editableId;
 
             return PartialView("_LedgerTable", model);
         }
+
 
         public async Task<IActionResult> UpdateLedgerItem([FromBody] LedgerItemDTO dto)
         {
@@ -81,6 +84,33 @@ namespace home_manager.Areas.BudgetManager.Controllers
                 return BadRequest($"Error saving incidental expense: {ex.Message}");
             }
         }
+
+
+        public async Task<IActionResult> CreateNewLedger()
+        {
+
+            var latestLedger = await _repository.GetLatestAvailableLedger();
+
+            // Get new ledger month and year
+            int originalMonth = latestLedger.Item1;
+            int originalYear = latestLedger.Item2;
+
+            int newMonth = originalMonth < 12 ? originalMonth + 1 : 1;
+            int newYear = newMonth == 1 ? originalYear + 1 : originalYear;
+
+
+            // Create new ledger and incidental records
+            await _repository.InsertNewLedger(newMonth, newYear);
+
+            return Json(new
+            {
+                success = true,
+                month = newMonth,
+                year = newYear
+            });
+
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

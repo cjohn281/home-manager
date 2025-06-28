@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_manager.Areas.BudgetManager.Models
 {
-    [Table("tbl_category")]
+    [Table("tbl_lookup_value")]
     public class Category
     {
-        [Column("cat_id")]
+        [Column("lvl_id")]
         public int Id { get; set; } = 0;
 
-        [Column("cat_transaction_type_tst_id")]
+        [Column("lvl_lookup_type_lkt_id")]
         public int TransactionType_tstId { get; set; } = 0;
 
-        [Column("cat_description")]
+        [Column("lvl_text")]
         public string Description { get; set; } = String.Empty;
     }
 }

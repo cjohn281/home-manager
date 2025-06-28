@@ -1,6 +1,6 @@
 ﻿@using home_manager.Helpers
 @{
-    ViewData["Title"] = "Ledger";
+    ViewData["Title"] = "Income";
 }
 @model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel
 
@@ -48,7 +48,7 @@
 </style>
 
 <div class="container">
-    <h2 class="mb-4">Ledger</h2>
+    <h2 class="mb-4">Income</h2>
 
     <div class="card">
         <div class="card-body">
@@ -97,7 +97,7 @@
                             </select>
                         </div>
                         <div class="col-md-3 ms-2">
-                            <a href="javascript:void(0)" onclick="createNewLedger()"><h6>Create Next Ledger</h6></a>
+                            <a href="javascript:void(0)" onclick="navigateToLedger()"><h6>Go to Ledger View</h6></a>
                         </div>
                     </div>
                 </div>
@@ -114,18 +114,14 @@
                     <thead>
                         <tr>
                             <th width="1%"></th>
-                            <th>Expense</th>
-                            <th>Description</th>
+                            <th class="text-center" width="1%">Paid</th>
                             <th>Date</th>
-                            <th>Paid</th>
-                            <th>Checking Amount</th>
-                            <th>Checking Balance</th>
-                            <th>Savings Amount</th>
-                            <th>Savings Balance</th>
+                            <th width="10%">Amount</th>
+                            <th width="20%">Person</th>
                         </tr>
                     </thead>
-                    <tbody id="_LedgerTable">
-                        <!-- Ledger Table content will be injected here -->
+                    <tbody id="_IncomeTable">
+                        <!-- Income Table content will be injected here -->
                     </tbody>
                 </table>
             </div>
@@ -135,28 +131,35 @@
 
 @section Scripts {
     <script>
+
         $(document).ready(function() {
-            loadLedgerTable();
+            refreshIncomeTable();
         });
 
-        function loadLedgerTable() {
+
+        function refreshIncomeTable() {
+            $('#edit-item').val('0');
+            loadIncomeTable();
+        }
+
+
+        function loadIncomeTable() {
             poster.on();
 
             const ledgerMonth = $('#monthFilter').val();
             const ledgerYear = $('#yearFilter').val();
 
-
             $.ajax({
-                url: '@Url.Action("GetLedgerTable", "Ledger", new { area = "BudgetManager" })',
+                url: '@Url.Action("GetIncomeTable", "Income", new { area = "BudgetManager" })',
                 type: 'POST',
                 data: { month: ledgerMonth, year: ledgerYear, editableId: parseInt($('#edit-item').val()) },
                 headers: {
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(data) {
-                    $('#_LedgerTable').html(data);
+                    $('#_IncomeTable').html(data);
                 },
-                error: function (xhr, status, errror) {
+                error: function (xhr, status, error) {
                     console.error('Error:', error);
                     console.log('Status:', status);
                     console.log('Response:', xhr.responseText);
@@ -167,14 +170,73 @@
             });
         }
 
-        function enableEditMode(itemId) {
-            $('#edit-item').val(itemId);
-            loadLedgerTable();
+
+        function resetPage() {
+            var month = document.getElementById("monthFilter").value;
+            var year = document.getElementById("yearFilter").value;
+
+            // Construct the URL. Replace "YourControllerName" with the actual controller name.
+            var url = '@Url.Action("Index", "Income", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
+
+            window.location.href = url;
         }
 
-        function refreshLedgerTable() {
-            $('#edit-item').val('0');
-            loadLedgerTable();
+        function navigateToLedger() {
+            var month = document.getElementById("monthFilter").value;
+            var year = document.getElementById("yearFilter").value;
+
+            // Construct the URL. Replace "YourControllerName" with the actual controller name.
+            var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
+
+            window.location.href = url;
+        }
+
+        function enableEditMode(itemId) {
+            $('#edit-item').val(itemId);
+            loadIncomeTable();
+        }
+
+        function saveItem(income_item) {
+            poster.on("Saving");
+            const amount = parseFloat($('#newAmount').val()) || 0;
+            const formattedAmount = Math.abs(amount);
+
+            const itemId = $(income_item).attr("id").split('-')[1];
+
+            const month = parseInt($('#monthFilter').val()) || 0;
+            const year = parseInt($('#yearFilter').val()) || 0;
+
+            const incomeItem = {
+                Id: parseInt(itemId),
+                Paid: document.querySelector('[id="newPaid"]').checked,
+                Date: $('#newDate').val(),
+                Amount: formattedAmount,
+                Month: month,
+                Year: year
+            }
+
+
+            $.ajax({
+                url: '@Url.Action("UpdateIncomeLedgerItem", "Income", new { area = "BudgetManager" })',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(incomeItem),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        refreshIncomeTable();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.err('Error:', error);
+                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
+                },
+                complete: function() {
+                    poster.off();
+                }
+            });
         }
 
         function pad2(n) { return n < 10 ? '0' + n : n; }
@@ -197,129 +259,6 @@
             if (current < minDate || current > maxDate) {
                 $('#newDate').val(minDate);
             }
-        }
-
-        function saveItem(ledger_item) {
-            const amount = parseFloat($('#newAmount').val()) || 0;
-            const formattedAmount = (Math.abs(amount) * -1);
-
-            const itemId = $(ledger_item).attr("id").split('-')[1];
-
-            const month = parseInt($('#monthFilter').val()) || 0;
-            const year = parseInt($('#yearFilter').val()) || 0;
-
-            // Get form data from the dynamic row
-            const payload = {
-                id: parseInt(itemId),
-                amount: formattedAmount,
-                isPaid: document.querySelector('[id="newPaid"]').checked,
-                date: $('#newDate').val()
-            };
-            
-            if (payload.Amount === 0) {
-                alert('Amount is required');
-                return;
-            }
-
-
-            poster.on("Saving");
-            $.ajax({
-                url: '@Url.Action("UpdateLedgerItem", "Ledger", new { area = "BudgetManager" })',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(payload),
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        refreshLedgerTable();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
-                },
-                complete: function() {
-                    poster.off();
-                }
-            });
-        }
-
-        function resetPage() {
-            var month = document.getElementById("monthFilter").value;
-            var year = document.getElementById("yearFilter").value;
-
-            var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
-
-            window.location.href = url;
-        }
-
-        function navigateToOther(name) {
-            var month = document.getElementById("monthFilter").value;
-            var year = document.getElementById("yearFilter").value;
-
-            console.log(name);
-
-            let url;
-
-            switch (name) {
-                case "Incidentals":
-                    url = '@Url.Action("Index", "IncidentalExpenses", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
-                    break;
-                case "Payday":
-                    url = '@Url.Action("Index", "Income", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
-                    break;
-                default:
-                    url = '@Url.Action("Index", "Savings", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
-            }
-
-            window.location.href = url;
-        }
-
-        function navigateToIncome() {
-            var month = document.getElementById("monthFilter").value;
-            var year = document.getElementById("yearFilter").value;
-
-            var url = '@Url.Action("Index", "Income", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
-
-            window.location.href = url;
-        }
-
-        function navigateToSavings() {
-            var month = document.getElementById("monthFilter").value;
-            var year = document.getElementById("yearFilter").value;
-
-            var url = '@Url.Action("Index", "Savings", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
-
-            window.location.href = url;
-        }
-
-        function createNewLedger() {
-            poster.on("Saving");
-            $.ajax({
-                url: '@Url.Action("CreateNewLedger", "Ledger", new { area = "BudgetManager" })',
-                contentType: 'application/json',
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        console.log(response.month, response.year);
-                        // window.location.href = response.redirectUrl;
-                        var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + response.month + "&year=" + response.year;
-
-                        window.location.href = url;
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
-                },
-                complete: function() {
-                    poster.off();
-                }
-            });
         }
     </script>
 }

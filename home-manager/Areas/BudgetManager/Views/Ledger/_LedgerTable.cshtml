@@ -2,8 +2,8 @@
 @model home_manager.Areas.BudgetManager.DTOs.LedgerDTO;
 
 @{
-    decimal runningCheckingTotal = Model.CheckingStartingBalance;
-    decimal runningSavingsTotal = Model.SavingsStartingBalance;
+    decimal runningCheckingTotal = Model.PreviousCheckingEndingBalance;
+    decimal runningSavingsTotal = Model.PreviousSavingsEndingBalance;
 }
 
 <tr>
@@ -13,17 +13,17 @@
     <td></td>
     <td></td>
     <td></td>
-    <th>@FormatHelper.FormatCurrency(Model.CheckingStartingBalance)</th>
+    <th>@FormatHelper.FormatCurrency(Model.PreviousCheckingEndingBalance)</th>
     <td style="background-color: #e8f9ff;"></td>
-    <th style="background-color: #e8f9ff;">@FormatHelper.FormatCurrency(Model.SavingsStartingBalance)</th>
+    <th style="background-color: #e8f9ff;">@FormatHelper.FormatCurrency(Model.PreviousSavingsEndingBalance)</th>
 </tr>
 @foreach (var item in Model.Items)
 {
     var rowColor = "";
-    if (item.TransactionType_tstId == 3) rowColor = "background-color: #e8f9ff;";
-    if (item.TransactionType_tstId == 5) rowColor = "background-color: #dbffe3;";
+    if (item.TransactionType_tstId == 5) rowColor = "background-color: #e8f9ff;";
+    if (item.TransactionType_tstId == 4) rowColor = "background-color: #dbffe3;";
     <tr style='@(rowColor)'>
-        @if (item.TransactionType_tstId == 2)
+        @if (item.TransactionType_tstId == 1)
         {
             if (item.Id == Model.EditableItemId)
             {
@@ -52,16 +52,16 @@
         {
             <td></td>
         }
-        @if (item.Name == "Incidentals")
+        @if (item.Name == "Incidentals" || item.Name == "Payday" || item.Name == "Savings")
         {
-            <td><a href="javascript:void(0)" onclick="navigateToIncidentals()">@item.Name</a></td>
+            <td><a href="javascript:void(0)" onclick="navigateToOther('@item.Name')">@item.Name</a></td>
         }
         else
         {
             <td>@item.Name</td>
         }
         <td>@item.Description</td>
-        @if (item.TransactionType_tstId == 2 && item.Id == Model.EditableItemId)
+        @if (item.TransactionType_tstId == 1 && item.Id == Model.EditableItemId)
         {   <td>
                 <input type="date"
                        id="newDate"
@@ -75,7 +75,7 @@
             <td>@item.Date.ToShortDateString()</td>
             <td><input type="checkbox" disabled @(item.IsPaid ? "checked" : "") /></td>
         }
-        @if (item.TransactionType_tstId == 1 || item.TransactionType_tstId == 2 || item.TransactionType_tstId == 5) // if incidental or recurring
+        @if (item.TransactionType_tstId == 2 || item.TransactionType_tstId == 1 || item.TransactionType_tstId == 4) // if incidental or recurring
         {
             runningCheckingTotal += item.Amount;
             if (item.Id == Model.EditableItemId)
@@ -98,7 +98,7 @@
             <td style="background-color: #e8f9ff;"></td>
             <td style="background-color: #e8f9ff;"></td>
         }
-        else if (item.TransactionType_tstId == 3 && item.Category_catId != 22) // if transfer to or from savings
+        else if (item.TransactionType_tstId == 5 && item.Category_catId != 32) // if transfer to or from savings
         {
             runningCheckingTotal -= item.Amount;
             runningSavingsTotal += item.Amount;

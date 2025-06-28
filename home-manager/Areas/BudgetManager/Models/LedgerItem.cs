@@ -12,19 +12,16 @@ namespace home_manager.Areas.BudgetManager.Models
         [Required, Column("lgi_ledger_ldg_id")]
         public int Ledger_ldgID { get; set; }
 
-        [Required, Column("lgi_is_recurring")]
-        public bool IsRecurring { get; set; }
-
         [Column("lgi_recurring_item_rci_id")]
         public int RecurringItem_rciID { get; set; }
-
-        [Column("lgi_incidental_item_ici_id")]
-        public int IncidentalItem_iciID { get; set; }
 
         [Required, Column("lgi_amount")]
         public float Amount { get; set; }
 
         [Required, Column("lgi_is_paid")]
         public bool IsPaid { get; set; }
+
+        [Required, Column("lgi_date")]
+        public DateTime Date { get; set; } = DateTime.Now;
     }
 }

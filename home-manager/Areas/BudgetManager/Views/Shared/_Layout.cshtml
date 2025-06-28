@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home Manager - @ViewData["Title"]</title>
+    <title>Budget Manager - @ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" asp-protocol="https" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" asp-protocol="https" />
     @Html.AntiForgeryToken()
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3" style="background-color: #e3f2fd;">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3" style="background-color: #f4c5fc">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Home Manager</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -19,6 +19,21 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="Ledger" asp-action="Index">Ledger</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="IncidentalExpenses" asp-action="Index">Incidentals</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="Income" asp-action="Index">Income</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="Savings" asp-action="Index">Savings Transfers</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="BudgetManager" asp-controller="RecurringExpenses" asp-action="Index">Recurring Expenses</a>
+                        </li>
                         <li class="nav-item">
                             <form asp-area="" asp-controller="Account" asp-action="Logout" asp-antiforgery="true" method="post" style="padding: 0;">
                                 <button type="submit" class="nav-link text-dark btn btn-link" style="background:none; border:none; padding: 0.5rem 0.5rem;">Logout</button>
