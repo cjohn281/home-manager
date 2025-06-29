@@ -52,7 +52,16 @@ else
                     <select id="categoryDropdown" class="form-select">
                         @foreach (var category in Model.Categories)
                         {
-                            <option value="@category.Id">@category.Description</option>
+                            if(item.Lookupvalue_lvlId == category.Id)
+                            {
+                                <option value="@category.Id" selected="selected">
+                                    @category.Description
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@category.Id">@category.Description</option>
+                            }
                         }
                     </select>
                 </td>
