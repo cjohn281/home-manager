@@ -8,5 +8,7 @@ namespace home_manager.Areas.BudgetManager.DTOs
         public decimal PreviousCheckingEndingBalance { get; set; } = 0.0M;
         public decimal PreviousSavingsEndingBalance { get; set; } = 0.0M;
         public int EditableItemId { get; set; } = 0;
+
+        public bool hideRunningBalance { get; set; } = true;
     }
 }

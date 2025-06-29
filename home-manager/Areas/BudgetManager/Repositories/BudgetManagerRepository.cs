@@ -21,6 +21,44 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
+        public async Task<bool> LedgerExists(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    month = month,
+                    year = year
+                };
+
+                var ledgerExists = (await connection.QueryFirstOrDefaultAsync<bool>(
+                    "SELECT * FROM fnc_ledger_exists(@month, @year)", parameters
+                ));
+
+                return ledgerExists;
+
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in LedgerExists: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+
         public async Task<(int, int)> GetLatestAvailableLedger()
         {
             try
@@ -182,6 +220,52 @@ namespace home_manager.Areas.BudgetManager.Repositories
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"General Error in GetEndingBalances: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return (0, 0);
+            }
+
+        }
+
+
+        public async Task<(decimal, decimal)> GetBalanceDetails(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                string sql = "SELECT * FROM fnc_get_current_balances_by_month(@month, @year)";
+
+                await using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("month", NpgsqlTypes.NpgsqlDbType.Integer, month);
+                command.Parameters.AddWithValue("year", NpgsqlTypes.NpgsqlDbType.Integer, year);
+
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    decimal checkingEndingBalance = reader.GetDecimal(0);
+                    decimal savingsEndingBalance = reader.GetDecimal(1);
+
+                    return (checkingEndingBalance, savingsEndingBalance);
+                }
+                else
+                {
+                    return (0, 0);
+                }
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return (0, 0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetBalanceDetails: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return (0, 0);
             }

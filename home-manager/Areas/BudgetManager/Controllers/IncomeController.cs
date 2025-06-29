@@ -25,7 +25,14 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
             if (month == null || year == null)
             {
-                model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+                if (await _repository.LedgerExists(DateTime.Now.Month, DateTime.Now.Year))
+                {
+                    model.SelectedLedger = (DateTime.Now.Month, DateTime.Now.Year);
+                }
+                else
+                {
+                    model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+                }
             }
             else
             {

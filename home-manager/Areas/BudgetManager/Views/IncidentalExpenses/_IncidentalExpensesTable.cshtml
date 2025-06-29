@@ -2,12 +2,20 @@
 @model home_manager.Areas.BudgetManager.ViewModels.IncidentalItems_VModel;
 
 
-@if (Model.Items[0].Id == 0)
+@if (Model.ShowDynamicRow == false)
+{
+    <tr>
+        <td colspan="9" style="align-self:center; color:orangered;">This ledger has not been created!</td>
+    </tr>
+}
+else if (Model.Items[0].Id == 0)
 {
     <tr>
         <td colspan="9" style="align-self:center; color:orangered;">There are no incidental items yet!</td>
     </tr>
-} else {
+}
+else
+{
     <tr>
         <td></td>
         <td></td>
@@ -121,7 +129,7 @@
         }
     }
 }
-@if (Model.EditableItemId == 0)
+@if (Model.EditableItemId == 0 && Model.ShowDynamicRow == true)
 {
     <tr id="_IncidentalExpensesDynamicRow">
         <td></td>

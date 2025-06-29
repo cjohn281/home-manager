@@ -1,0 +1,19 @@
+﻿@using home_manager.Helpers;
+@model home_manager.Areas.BudgetManager.ViewModels.BalanceDetail_VModel;
+
+<div class="card-body">
+    <input type="hidden" id="edit-item" name="edit-item" value="0" />
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-3">
+                <h6>Current Date: @(Model.Date.ToShortDateString())</h6>
+            </div>
+            <div class="col-md-3">
+                <h6>Current Balance: @(FormatHelper.FormatCurrency(Model.CurrentBalance))</h6>
+            </div>
+            <div class="col-md-3">
+                <h6>Savings Balance: @(FormatHelper.FormatCurrency(Model.SavingsBalance))</h6>
+            </div>
+        </div>
+    </div>
+</div>

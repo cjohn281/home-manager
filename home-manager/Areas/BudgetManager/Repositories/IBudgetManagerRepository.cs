@@ -5,11 +5,13 @@ namespace home_manager.Areas.BudgetManager.Repositories
 {
     public interface IBudgetManagerRepository
     {
+        Task<bool> LedgerExists(int month, int year);
         Task<(int, int)> GetLatestAvailableLedger();
         Task<IEnumerable<int>> GetAvailableLedgerMonths();
         Task<IEnumerable<int>> GetAvailableLedgerYears();
         Task<IEnumerable<LedgerItem_VModel>> GetLedgerItemsByMonth(int month, int year);
         Task<(decimal, decimal)> GetEndingBalances(int month, int year);
+        Task<(decimal, decimal)> GetBalanceDetails(int month, int year);
         Task<bool> UpdateLedgerItem(int id, decimal amount, bool isPaid, DateTime date);
         Task<IEnumerable<RecurringSavingsTransferDetail>> GetRecurringSavingsTransferDetails();
         Task<bool> InsertNewLedger(int month, int year);
