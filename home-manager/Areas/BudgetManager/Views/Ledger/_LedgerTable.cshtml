@@ -4,9 +4,19 @@
 @{
     decimal runningCheckingTotal = Model.PreviousCheckingEndingBalance;
     decimal runningSavingsTotal = Model.PreviousSavingsEndingBalance;
+    string styleHide = "";
+    if (Model.hideRunningBalance)
+        styleHide = "display: none;";
 }
-
-<tr>
+@if(Model.Items[0].Id == 0)
+{
+    <tr>
+        <td colspan="9" style="align-self:center; color:orangered;">This ledger has not been created!</td>
+    </tr>
+}
+else
+{
+<tr style="@styleHide">
     <td></td>
     <td></td>
     <td></td>
@@ -94,30 +104,30 @@
             {
                 <td style='@(item.Amount < 0 ? "color : red;" : ""))'>@FormatHelper.FormatCurrency(item.Amount)</td>
             }
-            <td>@FormatHelper.FormatCurrency(runningCheckingTotal)</td>
+            <td style="@styleHide">@FormatHelper.FormatCurrency(runningCheckingTotal)</td>
             <td style="background-color: #e8f9ff;"></td>
-            <td style="background-color: #e8f9ff;"></td>
+            <td style="background-color: #e8f9ff;@styleHide"></td>
         }
         else if (item.TransactionType_tstId == 5 && item.Category_catId != 32) // if transfer to or from savings
         {
             runningCheckingTotal -= item.Amount;
             runningSavingsTotal += item.Amount;
-            <td style='@(item.Amount * -1 < 0 ? "color : red;" : "")'>@FormatHelper.FormatCurrency((item.Amount * -1))</td>
-            <td>@FormatHelper.FormatCurrency(runningCheckingTotal)</td>
+            <td style="@(item.Amount * -1 < 0 ? "color : red;" : "")">@FormatHelper.FormatCurrency((item.Amount * -1))</td>
+            <td style="@styleHide">@FormatHelper.FormatCurrency(runningCheckingTotal)</td>
             <td style='@(item.Amount < 0 ? "color : red;" : "")'>@FormatHelper.FormatCurrency(item.Amount)</td>
-            <td>@FormatHelper.FormatCurrency(runningSavingsTotal)</td>
+            <td style="@styleHide">@FormatHelper.FormatCurrency(runningSavingsTotal)</td>
         }
         else // savings deposit
         {
             runningSavingsTotal += item.Amount;
             <td></td>
-            <td></td>
+            <td style="@styleHide"></td>
             <td style='@(item.Amount < 0 ? "color : red;" : "")'>@FormatHelper.FormatCurrency(item.Amount)</td>
-            <td>@FormatHelper.FormatCurrency(runningSavingsTotal)</td>
+            <td style="@styleHide">@FormatHelper.FormatCurrency(runningSavingsTotal)</td>
         }
     </tr>
 }
-<tr>
+<tr style="@styleHide">
     <td></td>
     <td></td>
     <td></td>
@@ -128,7 +138,7 @@
     <td></td>
     <td><strong>@FormatHelper.FormatCurrency(runningSavingsTotal)</strong></td>
 </tr>
-
+}
 
 <script>
     $(document).ready(function() {

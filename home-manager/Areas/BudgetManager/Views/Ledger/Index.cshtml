@@ -2,7 +2,14 @@
 @{
     ViewData["Title"] = "Ledger";
 }
-@model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel
+@model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel;
+
+@{
+    string styleHide = "";
+    if (Model.hideRunningBalance) {
+        styleHide = "display: none !important;";
+    }
+}
 
 <style>
     /* Remove spinner controls from number inputs */
@@ -105,6 +112,10 @@
         </div>
     </div>
 
+    <div class="card" id="_BalanceDetailCard">
+        <!-- BalanceDetailCard content will be injected here -->
+    </div>
+
     <div class="card">
         <div class="card-body">
             <input type="hidden" id="currentMonthId" value="@DateTime.Now.Month" />
@@ -119,9 +130,9 @@
                             <th>Date</th>
                             <th>Paid</th>
                             <th>Checking Amount</th>
-                            <th>Checking Balance</th>
+                            <th style="@styleHide">Checking Balance</th>
                             <th>Savings Amount</th>
-                            <th>Savings Balance</th>
+                            <th style="@styleHide">Savings Balance</th>
                         </tr>
                     </thead>
                     <tbody id="_LedgerTable">
@@ -139,8 +150,29 @@
             loadLedgerTable();
         });
 
+        function loadBalanceDetailCard() {
+
+            $.ajax({
+                url: '@Url.Action("GetBalanceDetailCard", "Ledger", new { area = "BudgetManager" })',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(data) {
+                    $('#_BalanceDetailCard').html(data);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
+                }
+            });
+        }
+
         function loadLedgerTable() {
             poster.on();
+
+            loadBalanceDetailCard();
 
             const ledgerMonth = $('#monthFilter').val();
             const ledgerYear = $('#yearFilter').val();
@@ -156,7 +188,7 @@
                 success: function(data) {
                     $('#_LedgerTable').html(data);
                 },
-                error: function (xhr, status, errror) {
+                error: function (xhr, status, error) {
                     console.error('Error:', error);
                     console.log('Status:', status);
                     console.log('Response:', xhr.responseText);

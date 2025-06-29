@@ -28,11 +28,23 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
             if (month == null || year == null)
             {
-                model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+                if (await _repository.LedgerExists(DateTime.Now.Month, DateTime.Now.Year))
+                {
+                    model.SelectedLedger = (DateTime.Now.Month, DateTime.Now.Year);
+                }
+                else
+                {
+                    model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+                }
+                model.hideRunningBalance = false;
             }
             else
             {
                 model.SelectedLedger = (month.Value, year.Value);
+                if (year.Value > DateTime.Now.Year || (year.Value == DateTime.Now.Year && month.Value >= DateTime.Now.Month))
+                {
+                    model.hideRunningBalance = false;
+                }
             }
 
             model.LedgerMonths = (await _repository.GetAvailableLedgerMonths()).ToList();
@@ -42,19 +54,39 @@ namespace home_manager.Areas.BudgetManager.Controllers
         }
 
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetBalanceDetailCard()
+        {
+            var model = new BalanceDetail_VModel();
+            model.Date = DateTime.Now;
+
+            var balances = (await _repository.GetBalanceDetails(model.Date.Month, model.Date.Year));
+            model.CurrentBalance = balances.Item1;
+            model.SavingsBalance = balances.Item2;
+
+            return PartialView("_BalanceDetailCard", model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetLedgerTable(int month, int year, int editableId)
         {
             var model = new LedgerDTO();
 
             model.Items = (await _repository.GetLedgerItemsByMonth(month, year)).ToList();
 
-            var prevMonth = month == 1 ? 12 : --month;
-            var prevYear = month == 12 ? --year : year;
+            var prevMonth = month == 1 ? 12 : month - 1;
+            var prevYear = prevMonth == 12 ? year - 1 : year;
 
             var balances = (await _repository.GetEndingBalances(prevMonth, prevYear));
             model.PreviousCheckingEndingBalance = balances.Item1;
             model.PreviousSavingsEndingBalance = balances.Item2;
             model.EditableItemId = editableId;
+
+            if (year > DateTime.Now.Year || (year == DateTime.Now.Year && month >= DateTime.Now.Month))
+                model.hideRunningBalance = false;
 
             return PartialView("_LedgerTable", model);
         }

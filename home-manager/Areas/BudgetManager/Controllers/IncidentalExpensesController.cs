@@ -30,7 +30,14 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
             if (month == null || year == null)
             {
-                model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+                if (await _repository.LedgerExists(DateTime.Now.Month, DateTime.Now.Year))
+                {
+                    model.SelectedLedger = (DateTime.Now.Month, DateTime.Now.Year);
+                }
+                else
+                {
+                    model.SelectedLedger = (await _repository.GetLatestAvailableLedger());
+                }
             }
             else
             {
@@ -55,6 +62,9 @@ namespace home_manager.Areas.BudgetManager.Controllers
             model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypes()).ToList();
             model.EditableItemId = editableId;
             model.CalculateTotals();
+
+            if (month == 1 && year == 2025)
+                model.ShowDynamicRow = false;
 
             return PartialView("_IncidentalExpensesTable", model);
         }
