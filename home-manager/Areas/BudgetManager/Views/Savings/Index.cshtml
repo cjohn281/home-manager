@@ -200,7 +200,7 @@
         function saveItem(savings_item) {
             poster.on("Saving");
             const amount = parseFloat($('#newAmount').val()) || 0;
-            const formattedAmount = $('#categoryDropdown').text().trim() === "From Savings" ? (Math.abs(amount) * -1) : Math.abs(amount);
+            let formattedAmount = $('#categoryDropdown option:selected').val() == 24 ? Math.abs(amount) * -1 : Math.abs(amount);
 
             const itemId = $(savings_item).attr("id").split('-')[1];
 
