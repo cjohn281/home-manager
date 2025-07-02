@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using home_manager.Helpers;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_manager.Areas.BudgetManager.Models
@@ -22,6 +23,6 @@ namespace home_manager.Areas.BudgetManager.Models
         public bool IsPaid { get; set; }
 
         [Required, Column("lgi_date")]
-        public DateTime Date { get; set; } = DateTime.Now;
+        public DateTime Date { get; set; } = TimeZoneHelper.LocalTime;
     }
 }

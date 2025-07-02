@@ -8,7 +8,7 @@
     if (Model.hideRunningBalance)
         styleHide = "display: none;";
 }
-@if(Model.Items[0].Id == 0)
+@if(Model.Items[0].Id == 0 && Model.Items.Count == 1)
 {
     <tr>
         <td colspan="9" style="align-self:center; color:orangered;">This ledger has not been created!</td>
@@ -88,7 +88,7 @@ else
         @if (item.TransactionType_tstId == 2 || item.TransactionType_tstId == 1 || item.TransactionType_tstId == 4) // if incidental or recurring
         {
             runningCheckingTotal += item.Amount;
-            if (item.Id == Model.EditableItemId)
+            if (item.Id != 0 && item.Id == Model.EditableItemId)
             {
                 <td>
                     <div class="input-group">

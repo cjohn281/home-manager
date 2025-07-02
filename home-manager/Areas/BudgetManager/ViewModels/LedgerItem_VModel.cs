@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using home_manager.Data;
+using home_manager.Helpers;
 using home_manager.Models;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,7 @@ namespace home_manager.Areas.BudgetManager.ViewModels
         public string TransactionTypeName { get; set; } = string.Empty;
         public int Category_catId { get; set; } = 0;
         public string CategoryName { get; set; } = string.Empty;
-        public DateTime Date { get; set; } = DateTime.Now;
+        public DateTime Date { get; set; } = TimeZoneHelper.LocalTime;
         public bool IsPaid { get; set; } = true;
         public string ItemType { get; set; } = string.Empty;
     }

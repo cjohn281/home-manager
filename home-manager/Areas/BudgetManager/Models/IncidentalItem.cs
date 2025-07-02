@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using home_manager.Helpers;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_manager.Areas.BudgetManager.Models
@@ -19,7 +20,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public string Description { get; set; } = String.Empty;
 
         [Column("ici_date")]
-        public DateTime Date { get; set; } = DateTime.Now;
+        public DateTime Date { get; set; } = TimeZoneHelper.LocalTime;
 
         [Column("ici_amount")]
         public decimal Amount { get; set; } = 0.0M;
