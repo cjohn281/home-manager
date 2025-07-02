@@ -1,6 +1,7 @@
 ﻿using home_manager.Areas.BudgetManager.Models;
 using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
+using home_manager.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static home_manager.Helpers.DropdownHelper;
@@ -25,9 +26,9 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
             if (month == null || year == null)
             {
-                if (await _repository.LedgerExists(DateTime.Now.Month, DateTime.Now.Year))
+                if (await _repository.LedgerExists(TimeZoneHelper.LocalTime.Month, TimeZoneHelper.LocalTime.Year))
                 {
-                    model.SelectedLedger = (DateTime.Now.Month, DateTime.Now.Year);
+                    model.SelectedLedger = (TimeZoneHelper.LocalTime.Month, TimeZoneHelper.LocalTime.Year);
                 }
                 else
                 {

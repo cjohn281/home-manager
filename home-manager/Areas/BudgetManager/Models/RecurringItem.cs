@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using home_manager.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_manager.Areas.BudgetManager.Models
 {
@@ -27,7 +28,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public decimal? InterestRate { get; set; }
 
         [Column("rci_day")]
-        public int Day { get; set; } = DateTime.Now.Day;
+        public int Day { get; set; } = TimeZoneHelper.LocalTime.Day;
 
         [Column("rci_jan")]
         public bool Jan { get; set; } = false;

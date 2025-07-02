@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using home_manager.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_manager.Areas.BudgetManager.Models
 {
@@ -14,7 +15,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public string CategoryName { get; set; } = string.Empty;
 
         [Column("sli_date")]
-        public DateTime Date { get; set; } = DateTime.Now;
+        public DateTime Date { get; set; } = TimeZoneHelper.LocalTime;
 
         [Column("sli_amount")]
         public decimal Amount { get; set; } = 0.0M;

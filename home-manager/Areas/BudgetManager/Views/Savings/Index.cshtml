@@ -107,8 +107,8 @@
 
     <div class="card">
         <div class="card-body">
-            <input type="hidden" id="currentMonthId" value="@DateTime.Now.Month" />
-            <input type="hidden" id="currentYearId" value="@DateTime.Now.Year" />
+            <input type="hidden" id="currentMonthId" value="@TimeZoneHelper.LocalTime.Month" />
+            <input type="hidden" id="currentYearId" value="@TimeZoneHelper.LocalTime.Year" />
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
