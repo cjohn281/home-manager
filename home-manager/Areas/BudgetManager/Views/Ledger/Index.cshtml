@@ -147,7 +147,6 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            console.log('@(TimeZoneHelper.LocalTime)');
             loadLedgerTable();
         });
 
@@ -291,8 +290,6 @@
         function navigateToOther(name) {
             var month = document.getElementById("monthFilter").value;
             var year = document.getElementById("yearFilter").value;
-
-            console.log(name);
 
             let url;
 

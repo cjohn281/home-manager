@@ -171,7 +171,7 @@
             });  
         }
 
-        function updateCategoryDropdown() {
+        function updateCategoryDropdown(itemId) {
             const transactionId = $('#transactionDropdown').val();
             const categoryDropdown = $('#categoryDropdown');
 
@@ -180,16 +180,25 @@
             $.ajax({
                 url: '@Url.Action("GetCategoriesByTransaction", "IncidentalExpenses", new { area = "BudgetManager" })',
                 type: 'GET',
-                data: { transactionId: transactionId},
+                data: { transactionId: transactionId, itemId: itemId },
+                dataType: 'json',
                 success: function(data) {
                     categoryDropdown.empty();
 
-                    $.each(data, function(index, category) {
-                        categoryDropdown.append(
-                            $('<option></option>')
+                    console.log(data.categories);
+
+                    $.each(data.categories, function(i, category) {
+
+                        const option = $('<option></option>')
                                 .val(category.id)
-                                .text(category.description)
-                        );
+                                .text(category.description);
+
+                        if (category.id === data.selectedCategory) {
+                            option.prop('selected', true);
+                        }
+
+                        categoryDropdown.append(option);
+
                     });
                 },
                 error: function(xhr, status, error) {

@@ -4,6 +4,7 @@ using home_manager.Areas.BudgetManager.Repositories;
 using home_manager.Areas.BudgetManager.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using home_manager.Areas.BudgetManager.Models;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
@@ -67,12 +68,24 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetCategoriesByTransaction(int transactionId)
+        public async Task<IActionResult> GetCategoriesByTransaction(int transactionId, int itemId)
         {
+            IncidentalItem selectedItem = new();
+            int selectedCategory = 0;
 
             var categories = (await _repository.GetCategoriesByTransactionId(transactionId)).ToList();
 
-            return Json(categories);
+            if (itemId != 0)
+            {
+                selectedItem = (await _repository.GetIncidentalItemById(itemId));
+                selectedCategory = selectedItem.Category_catID;
+            }
+
+
+            return Json(new {
+                Categories = categories.Select(c => new { id = c.Id, description = c.Description }),
+                SelectedCategory = selectedCategory
+            });
         }
 
 

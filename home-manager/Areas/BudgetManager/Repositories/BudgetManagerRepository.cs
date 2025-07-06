@@ -801,6 +801,42 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
+        public async Task<IncidentalItem> GetIncidentalItemById(int id)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var item = await connection.QueryFirstOrDefaultAsync<IncidentalItem>(
+                    "SELECT * FROM fnc_get_incidental_item_by_id(@id)", new { id }
+                );
+
+                if (item == null)
+                {
+                    return new IncidentalItem();
+                }
+
+                return item;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new IncidentalItem();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncidentalItemById: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new IncidentalItem();
+            }
+        }
+
+
         public async Task<IEnumerable<Category>> GetIncidentalCategories()
         {
 
