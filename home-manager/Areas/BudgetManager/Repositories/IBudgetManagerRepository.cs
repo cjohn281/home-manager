@@ -28,6 +28,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         
         Task<IEnumerable<IncidentalItem>> GetIncidentalItems(int month, int year);
         Task<IEnumerable<TransactionType>> GetIncidentalTransactionTypes();
+        Task<IncidentalItem> GetIncidentalItemById(int Id);
         Task<IEnumerable<Category>> GetIncidentalCategories();
         Task<IEnumerable<Category>> GetCategoriesByTransactionId(int transactionId);
         Task<bool> UpdateIncidentalItem(IncidentalItem item, int month, int year);

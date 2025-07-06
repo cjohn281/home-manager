@@ -91,7 +91,15 @@ else
                 <select id="categoryDropdown" class="form-select">
                     @foreach (var category in Model.DynamicCategoryOptions)
                     {
-                        <option value="@category.Id">@category.Description</option>
+                        if(category.Id == item.Id)
+                        {
+                            <option value="@category.Id" selected>@category.Description</option>
+                        }
+                        else
+                        {
+                            <option value="@category.Id">@category.Description</option>
+                        }
+
                     }
                 </select>
             </td>
@@ -185,7 +193,7 @@ else
 <script>
     $(document).ready(function() {
 
-        updateCategoryDropdown();
+        updateCategoryDropdown(@Model.EditableItemId);
 
         $('#transactionDropdown').change(function() {
             updateCategoryDropdown();
