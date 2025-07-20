@@ -12,6 +12,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<IEnumerable<LedgerItem_VModel>> GetLedgerItemsByMonth(int month, int year);
         Task<(decimal, decimal)> GetEndingBalances(int month, int year);
         Task<(decimal, decimal)> GetBalanceDetails(int month, int year);
+        Task<decimal> GetBalanceBeforeNextPay(int month, int year);
         Task<bool> UpdateLedgerItem(int id, decimal amount, bool isPaid, DateTime date);
         Task<IEnumerable<RecurringSavingsTransferDetail>> GetRecurringSavingsTransferDetails();
         Task<bool> InsertNewLedger(int month, int year);
