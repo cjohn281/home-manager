@@ -66,6 +66,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
             model.CurrentBalance = balances.Item1;
             model.SavingsBalance = balances.Item2;
 
+            model.BalanceBeforeNextPay = (await _repository.GetBalanceBeforeNextPay(model.Date.Month, model.Date.Year));
+
             return PartialView("_BalanceDetailCard", model);
         }
 

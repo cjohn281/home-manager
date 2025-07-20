@@ -273,6 +273,50 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
+        public async Task<decimal> GetBalanceBeforeNextPay(int month, int year)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                string sql = "SELECT * FROM fnc_get_current_balances_before_next_pay(@month, @year)";
+
+                await using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("month", NpgsqlTypes.NpgsqlDbType.Integer, month);
+                command.Parameters.AddWithValue("year", NpgsqlTypes.NpgsqlDbType.Integer, year);
+
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    decimal checkingEndingBalance = reader.GetDecimal(0);
+
+                    return checkingEndingBalance;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetBalanceBeforeNextPay: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return 0;
+            }
+        }
+
+
         public async Task<bool> UpdateLedgerItem(int id, decimal amount, bool isPaid, DateTime date)
         {
             try

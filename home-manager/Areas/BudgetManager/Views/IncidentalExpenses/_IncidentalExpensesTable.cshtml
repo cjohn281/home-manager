@@ -196,7 +196,7 @@ else
         updateCategoryDropdown(@Model.EditableItemId);
 
         $('#transactionDropdown').change(function() {
-            updateCategoryDropdown();
+            updateCategoryDropdown(0);
         });
 
         setDateInputRange();

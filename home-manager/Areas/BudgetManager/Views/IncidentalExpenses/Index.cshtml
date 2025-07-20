@@ -185,8 +185,6 @@
                 success: function(data) {
                     categoryDropdown.empty();
 
-                    console.log(data.categories);
-
                     $.each(data.categories, function(i, category) {
 
                         const option = $('<option></option>')
