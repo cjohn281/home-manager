@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-    [Area("BudgetManager")]
-    [Authorize]
-    public class SavingsController : Controller
+    public class SavingsController : BudgetManagerController
     {
         private readonly IBudgetManagerRepository _repository;
 

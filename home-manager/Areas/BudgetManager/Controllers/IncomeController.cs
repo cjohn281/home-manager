@@ -8,9 +8,7 @@ using static home_manager.Helpers.DropdownHelper;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-    [Area("BudgetManager")]
-    [Authorize]
-    public class IncomeController : Controller
+    public class IncomeController : BudgetManagerController
     {
         private readonly IBudgetManagerRepository _repository;
 

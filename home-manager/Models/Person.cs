@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace home_manager.Areas.BudgetManager.Models
+namespace home_manager.Models
 {
     [Table("tbl_person")]
     public class Person
@@ -23,5 +23,8 @@ namespace home_manager.Areas.BudgetManager.Models
 
         [Column("prn_date_created")]
         public DateTime DateCreated { get; set; }
+
+        [Column("prn_role_lvl_id")]
+        public required int Role { get; set; } = 39;
     }
 }
