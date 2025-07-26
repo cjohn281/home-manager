@@ -46,21 +46,44 @@
             padding: 0.5rem 0.25rem;
         }
 
-    #filter-bar {
+    .ledger-filter-bar {
         display: flex;
         align-items: end;
         justify-content: space-between;
         width: 100%;
     }
 
-    #filter-dropdowns {
+    .ledger-filter-dropdowns {
         display:flex;
         gap: 1rem;
         width: 50%;
+        flex-wrap: wrap;
     }
 
-    #filter-dropdowns > div {
+    .ledger-filter-dropdowns > div {
         flex: 1 1 0;
+    }
+
+    #add-ledger-btn {
+        border: none;
+        padding: 0;
+        margin-right: 0.5rem;
+    }
+
+    @@media (max-width: 750px) {
+        .ledger-filter-bar {
+            align-items: start;
+        }
+
+        .ledger-filter-dropdowns {
+            flex-direction: column;
+            width: 70%;
+        }
+
+        #add-ledger-btn {
+            margin-top: 2rem;
+            margin-right: 0.5;
+        }
     }
 
 </style>
@@ -71,8 +94,8 @@
     <div class="card">
         <div class="card-body">
             <input type="hidden" id="edit-item" name="edit-item" value="0" />
-            <div id="filter-bar">
-                <div id="filter-dropdowns">
+            <div class="ledger-filter-bar">
+                <div class="ledger-filter-dropdowns">
                     <div>
                         <label for="monthFilter" class="form-label">Month</label>
                         <select id="monthFilter" class="form-select" onchange="resetPage()">
@@ -114,8 +137,8 @@
                         </select>
                     </div>
                 </div>
-                <button type="button" id="add-ledger-btn" class="btn btn-outline-primary" style="border: none; margin-right:8px;" onclick="createNewLedger()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                <button type="button" id="add-ledger-btn" class="btn btn-outline-primary" onclick="createNewLedger()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
                         <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
                     </svg>
