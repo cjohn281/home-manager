@@ -8,9 +8,7 @@ using home_manager.Areas.BudgetManager.Models;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-    [Area("BudgetManager")]
-    [Authorize]
-    public class IncidentalExpensesController : Controller
+    public class IncidentalExpensesController : BudgetManagerController
     {
         private readonly IBudgetManagerRepository _repository;
 

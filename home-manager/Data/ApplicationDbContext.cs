@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using home_manager.Areas.BudgetManager.Models;
+using home_manager.Models;
 
 namespace home_manager.Data
 {

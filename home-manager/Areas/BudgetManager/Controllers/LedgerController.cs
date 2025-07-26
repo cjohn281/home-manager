@@ -10,9 +10,7 @@ using System.Diagnostics;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-    [Area("BudgetManager")]
-    [Authorize]
-    public class LedgerController : Controller
+    public class LedgerController : BudgetManagerController
     {
         private readonly IBudgetManagerRepository _repository;
 

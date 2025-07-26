@@ -8,10 +8,7 @@ using System.Diagnostics;
 
 namespace home_manager.Areas.BudgetManager.Controllers
 {
-
-    [Area("BudgetManager")]
-    [Authorize]
-    public class RecurringExpensesController : Controller
+    public class RecurringExpensesController : BudgetManagerController
     {
         private readonly IBudgetManagerRepository _repository;
 
