@@ -46,12 +46,23 @@
             padding: 0.5rem 0.25rem;
         }
 
-    #filter-container {
+    #filter-bar {
         display: flex;
-        justify-content: start;
         align-items: end;
-        width: auto;
+        justify-content: space-between;
+        width: 100%;
     }
+
+    #filter-dropdowns {
+        display:flex;
+        gap: 1rem;
+        width: 50%;
+    }
+
+    #filter-dropdowns > div {
+        flex: 1 1 0;
+    }
+
 </style>
 
 <div class="container">
@@ -60,54 +71,59 @@
     <div class="card">
         <div class="card-body">
             <input type="hidden" id="edit-item" name="edit-item" value="0" />
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group" id="filter-container">
-                        <div class="col-md-3">
-                            <label for="monthFilter" class="form-label">Month</label>
-                            <select id="monthFilter" class="form-select" onchange="resetPage()">
-                                @foreach (var month in Model.LedgerMonths)
+            <div id="filter-bar">
+                <div id="filter-dropdowns">
+                    <div>
+                        <label for="monthFilter" class="form-label">Month</label>
+                        <select id="monthFilter" class="form-select" onchange="resetPage()">
+                            @foreach (var month in Model.LedgerMonths)
+                            {
+                                if (Model.SelectedLedger.month == month)
                                 {
-                                    if (Model.SelectedLedger.month == month)
-                                    {
-                                        <option value="@month" selected="selected">
-                                            @(DropdownHelper.MonthDropdownOptions[month])
-                                        </option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@month">
-                                            @(DropdownHelper.MonthDropdownOptions[month])
-                                        </option>
-                                    }
+                                    <option value="@month" selected="selected">
+                                        @(DropdownHelper.MonthDropdownOptions[month])
+                                    </option>
                                 }
-                            </select>
-                        </div>
-                        <div class="col-md-3 ms-2">
-                            <label for="yearFilter" class="form-label">Year</label>
-                            <select id="yearFilter" class="form-select" onchange="resetPage()">
-                                @foreach (var year in Model.LedgerYears)
+                                else
                                 {
-                                    if (Model.SelectedLedger.year == year)
-                                    {
-                                        <option value="@year" selected="selected">
-                                            @year
-                                        </option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@year">
-                                            @year
-                                        </option>
-                                    }
+                                    <option value="@month">
+                                        @(DropdownHelper.MonthDropdownOptions[month])
+                                    </option>
                                 }
-                            </select>
-                        </div>
-                        <div class="col-md-3 ms-2">
-                            <a href="javascript:void(0)" onclick="createNewLedger()"><h6>Create Next Ledger</h6></a>
-                        </div>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="yearFilter" class="form-label">Year</label>
+                        <select id="yearFilter" class="form-select" onchange="resetPage()">
+                            @foreach (var year in Model.LedgerYears)
+                            {
+                                if (Model.SelectedLedger.year == year)
+                                {
+                                    <option value="@year" selected="selected">
+                                        @year
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@year">
+                                        @year
+                                    </option>
+                                }
+                            }
+                        </select>
                     </div>
                 </div>
+                <button type="button" id="add-ledger-btn" class="btn btn-outline-primary" style="border: none; margin-right:8px;" onclick="createNewLedger()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                        <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                    </svg>
+                    <span class="visually-hidden">Create New Ledger Button</span>
+                </button>
+                @* <div class="col-md-3 ms-2">
+                    <a href="javascript:void(0)" onclick="createNewLedger()"><h6>Create Next Ledger</h6></a>
+                </div> *@
             </div>
         </div>
     </div>
@@ -327,29 +343,34 @@
 
         function createNewLedger() {
             poster.on("Saving");
-            $.ajax({
-                url: '@Url.Action("CreateNewLedger", "Ledger", new { area = "BudgetManager" })',
-                contentType: 'application/json',
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        console.log(response.month, response.year);
-                        // window.location.href = response.redirectUrl;
-                        var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + response.month + "&year=" + response.year;
 
-                        window.location.href = url;
+            if(confirm("Create a new Ledger?")) {
+                $.ajax({
+                    url: '@Url.Action("CreateNewLedger", "Ledger", new { area = "BudgetManager" })',
+                    contentType: 'application/json',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            console.log(response.month, response.year);
+                            // window.location.href = response.redirectUrl;
+                            var url = '@Url.Action("Index", "Ledger", new { area = "BudgetManager" })' + "?month=" + response.month + "&year=" + response.year;
+
+                            window.location.href = url;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert(xhr.responseText || 'Failed to save changes. Please try again.');
+                    },
+                    complete: function() {
+                        poster.off();
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert(xhr.responseText || 'Failed to save changes. Please try again.');
-                },
-                complete: function() {
-                    poster.off();
-                }
-            });
+                });
+            } else {
+                poster.off();
+            }
         }
     </script>
 }
