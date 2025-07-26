@@ -60,8 +60,18 @@
 
     @@media (max-width: 750px) {
 
+        .filter-bar {
+            justify-content: space-between;
+        }
+
         .filter-dropdowns {
             flex-direction: column;
+            width: 70%;
+        }
+
+        .filter-bar > a > h6 {
+            text-align: center;
+            margin-bottom: 0;
         }
     }
 </style>  
@@ -115,7 +125,7 @@
                         </select>
                     </div>
                 </div>
-                <a href="javascript:void(0)" onclick="navigateToLedger()"><h6>Go to Ledger View</h6></a>
+                <a href="javascript:void(0)" onclick="navigateToLedger()"><h6>Ledger View</h6></a>
             </div>
         </div>
     </div>
