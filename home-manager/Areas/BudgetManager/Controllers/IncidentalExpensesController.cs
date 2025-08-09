@@ -54,7 +54,7 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
             model.Items = (await _repository.GetIncidentalItems(month, year)).ToList();
             model.DynamicCategoryOptions = (await _repository.GetIncidentalCategories()).ToList();
-            model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypes()).ToList();
+            //model.DynamicTransactionOptions = (await _repository.GetIncidentalTransactionTypes()).ToList();
             model.EditableItemId = editableId;
             model.CalculateTotals();
 
@@ -146,6 +146,14 @@ namespace home_manager.Areas.BudgetManager.Controllers
             {
                 return BadRequest($"Error deleting incidental item: {ex.Message}");
             }
+        }
+
+        public async Task<IActionResult> LoadModifyModal(int itemID)
+        {
+            var model = await _repository.GetIncidentalItemById(itemID);
+            model.CategoryList = (await _repository.GetIncidentalCategories()).ToList<Category>();
+
+            return PartialView("_ModifyModal", model);
         }
     }
 }

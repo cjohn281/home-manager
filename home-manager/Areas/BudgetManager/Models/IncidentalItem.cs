@@ -36,5 +36,9 @@ namespace home_manager.Areas.BudgetManager.Models
         public int TransactionType_tstId { get; set; } = 0;
 
         public string TransactionTypeName { get; set; } = String.Empty;
+
+        public List<Category> CategoryList { get; set; } = new List<Category>();
     }
 }
+
+    
