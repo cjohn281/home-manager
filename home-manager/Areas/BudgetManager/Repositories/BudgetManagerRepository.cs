@@ -1120,6 +1120,41 @@ namespace home_manager.Areas.BudgetManager.Repositories
             }
         }
 
+        public async Task<IncomeLedgerItem> GetIncomeLedgerItemById(int id)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var item = (await connection.QueryAsync<IncomeLedgerItem>(
+                    "SELECT * FROM fnc_get_income_ledger_item_by_id(@id)", new { id }
+                )).FirstOrDefault();
+
+                if (item == null)
+                {
+                    return new IncomeLedgerItem();
+                }
+
+                return item;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new IncomeLedgerItem();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncomeLedgerItemById: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new IncomeLedgerItem();
+            }
+        }
+
 
         public async Task<IEnumerable<SavingsLedgerItem>> GetSavingsLedgerItems(int month, int year)
         {
@@ -1232,6 +1267,41 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"General Error in DeleteSavingsLedgerItem: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
+            }
+        }
+
+
+        public async Task<IEnumerable<Person>> GetPersonList()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var items = (await connection.QueryAsync<Person>(
+                    "SELECT * FROM fnc_get_person_list()"))?.ToList();
+
+                if (items == null || items.Count == 0)
+                {
+                    return new List<Person> { new Person() };
+                }
+
+                return items;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<Person> { new Person() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetPersonList: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<Person> { new Person() };
             }
         }
     }

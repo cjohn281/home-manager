@@ -26,5 +26,7 @@ namespace home_manager.Areas.BudgetManager.Models
         public int Month { get; set; } = 0;
 
         public int Year { get; set; } = 0;
+
+        public List<Person> PersonList { get; set; } = new List<Person>();
     }
 }

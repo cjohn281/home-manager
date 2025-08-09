@@ -4,77 +4,13 @@
 }
 @model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel
 
-<style>
-    /* Remove spinner controls from number inputs */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-
-    .container {
-        max-width: 95vw !important;
-        margin: 0 auto;
-        padding: 0 10px;
-    }
-
-    .card {
-        width: 100%;
-        margin: 0;
-    }
-
-    .card-body {
-        padding: 1rem 0.5rem;
-    }
-
-    .table {
-        margin: 0;
-    }
-
-        .table td, .table th {
-            padding: 0.5rem 0.25rem;
-        }
-
-    .filter-bar {
-        display: flex;
-        gap: 1rem;
-        align-items: end;
-        justify-content: start;
-        width: 100%
-    }
-
-    .filter-dropdowns {
-        display: flex;
-        gap: 1rem;
-        width: 50%;
-        flex-wrap: wrap;
-    }
-
-        .filter-dropdowns > div {
-            flex: 1 1 0;
-        }
-
-    @@media (max-width: 750px) {
-
-        .filter-bar {
-            justify-content: space-between;
-        }
-
-        .filter-dropdowns {
-            flex-direction: column;
-            width: 70%;
-        }
-
-        .filter-bar > a > h6 {
-            text-align: center;
-            margin-bottom: 0;
-        }
-    }
-</style>
+<div class="modal fade" id="ModifyModal" role="dialog" aria-hidden="True">
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content" id="ModifyModalContent">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <h2 class="mb-4">Income</h2>
@@ -138,11 +74,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th width="1%"></th>
-                            <th class="text-center" width="1%">Paid</th>
-                            <th>Date</th>
-                            <th width="10%">Amount</th>
-                            <th width="20%">Person</th>
+                            <th class="hide-cells-on-small-display" width="1%"></th>
+                            <th>Person</th>
+                            <th width="24%">Date</th>
+                            <th class="text-center" width="24%">Paid</th>
+                            <th width="24%">Amount</th>
                         </tr>
                     </thead>
                     <tbody id="_IncomeTable">
@@ -251,6 +187,7 @@
                 },
                 success: function(response) {
                     if (response.success) {
+                        $('#ModifyModal').modal('hide');
                         refreshIncomeTable();
                     }
                 },
@@ -283,6 +220,38 @@
             const current = $('#newDate').val();
             if (current < minDate || current > maxDate) {
                 $('#newDate').val(minDate);
+            }
+        }
+
+        function loadIncomeItemModal(itemId) {
+            if(window.matchMedia("(max-width: 750px)").matches) {
+                poster.on("Loading");
+
+                // Request modal content
+                $.ajax({
+                    url: '@Url.Action("LoadModifyModal", "Income", new { area = "BudgetManager" })',
+                    type: 'POST',
+                    data: { itemId: itemId },
+                    headers: {
+                        // Include anti-forgery token for security
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        // Insert modal content and show the modal
+                        $('#ModifyModalContent').html(response);
+                        $('#ModifyModal').modal('show');
+                    },
+                    error: function (xhr, status, error) {
+                        // Log detailed error information for debugging
+                        console.error('Error:', error);
+                        console.log('Status:', status);
+                        console.log('Response:', xhr.responseText);
+                    },
+                    complete: function() {
+                        // Hide loading indicator regardless of success/failure
+                        poster.off();
+                    }
+                });
             }
         }
     </script>

@@ -75,5 +75,15 @@ namespace home_manager.Areas.BudgetManager.Controllers
                 return BadRequest($"Error saving income ledger item: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoadModifyModal(int itemId)
+        {
+            var model = await _repository.GetIncomeLedgerItemById(itemId);
+            model.PersonList = (await _repository.GetPersonList()).ToList();
+
+            return PartialView("_ModifyModal", model);
+        }
     }
 }

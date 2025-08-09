@@ -16,7 +16,7 @@ namespace home_manager.Data
         public DbSet<Ledger> Ledgers { get; set; }
         public DbSet<LedgerBalance> LedgerBalances { get; set; }
         public DbSet<LedgerItem> LedgerItems { get; set; }
-        public DbSet<Person> Persons { get; set; }
+        public DbSet<home_manager.Models.Person> Persons { get; set; }
         public DbSet<RecurringItem> RecurringItems { get; set; }
         public DbSet<TransactionType> TransactionTypes { get; set; }
     }
