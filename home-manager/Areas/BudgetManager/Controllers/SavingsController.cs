@@ -101,5 +101,15 @@ namespace home_manager.Areas.BudgetManager.Controllers
                 return BadRequest($"Error deleting savings ledger item: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoadModifyModal(int itemId)
+        {
+            var model = await _repository.GetSavingsLedgerItemById(itemId);
+            model.CategoryList = (await _repository.GetCategoriesByTransactionId(5)).ToList();
+
+            return PartialView("_ModifyModal", model);
+        }
     }
 }
