@@ -2,79 +2,15 @@
 @{  
     ViewData["Title"] = "Incidental Expenses";  
 }  
-@model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel  
+@model home_manager.Areas.BudgetManager.ViewModels.AvailableLedgerDropdown_VModel
 
-<style>
-    /* Remove spinner controls from number inputs */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-
-    .container {
-        max-width: 95vw !important;
-        margin: 0 auto;
-        padding: 0 10px;
-    }
-
-    .card {
-        width: 100%;
-        margin: 0;
-    }
-
-    .card-body {
-        padding: 1rem 0.5rem;
-    }
-
-    .table {
-        margin: 0;
-    }
-
-        .table td, .table th {
-            padding: 0.5rem 0.25rem;
-        }
-    
-    .filter-bar {
-        display: flex;
-        gap: 1rem;
-        align-items: end;
-        justify-content: start;
-        width: 100%
-    }
-
-    .filter-dropdowns {
-        display: flex;
-        gap: 1rem;
-        width: 50%;
-        flex-wrap: wrap;
-    }
-
-    .filter-dropdowns > div {
-        flex: 1 1 0;
-    }
-
-    @@media (max-width: 750px) {
-
-        .filter-bar {
-            justify-content: space-between;
-        }
-
-        .filter-dropdowns {
-            flex-direction: column;
-            width: 70%;
-        }
-
-        .filter-bar > a > h6 {
-            text-align: center;
-            margin-bottom: 0;
-        }
-    }
-</style>  
+<div class="modal fade" id="ModifyModal" role="dialog" aria-hidden="True">
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content" id="ModifyModalContent">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+</div>
 
 <div class="container">  
     <h2 class="mb-4">Incidental Expenses</h2>  
@@ -135,18 +71,18 @@
             <input type="hidden" id="currentMonthId" value="@TimeZoneHelper.LocalTime.Month" />
             <input type="hidden" id="currentYearId" value="@TimeZoneHelper.LocalTime.Year" />
             <div class="table-responsive">  
-                <table class="table table-hover">  
+                <table class="table table-hover text-center">  
                     <thead>  
                         <tr>  
-                            <th width="1%"></th>
-                            <th width="1%"></th>
-                            <th class="text-center" width="1%">Paid</th>
-                            <th>Date</th>
-                            <th width="20%">Expense</th>
-                            <th width="10%">Amount</th>
-                            <th width="20%">Description (optional)</th>
-                            <th>Transaction Type</th>
-                            <th>Category</th>
+                            <th class="hide-cells-on-small-display" width="1%"></th>
+                            <th class="hide-cells-on-small-display" width="1%"></th>
+                            <th>Expense</th>
+                            <th width="16%">Date</th>
+                            <th class="text-center" width="16%">Paid</th>
+                            <th width="16%">Amount</th>
+                            <th class="hide-cells-on-small-display" width="16%">Description (optional)</th>
+                            @* <th class="hide-cells-on-small-display">Transaction Type</th> *@
+                            <th width="16%">Category</th>
                         </tr>  
                     </thead>  
                     <tbody id="_IncidentalExpensesTable">  
@@ -196,47 +132,50 @@
             });  
         }
 
-        function updateCategoryDropdown(itemId) {
-            const transactionId = $('#transactionDropdown').val();
-            const categoryDropdown = $('#categoryDropdown');
+        // function updateCategoryDropdown(itemId) {
+        //     const transactionId = $('#transactionDropdown').val();
+        //     const categoryDropdown = $('#categoryDropdown');
 
-            categoryDropdown.prop('disabled', true);
+        //     categoryDropdown.prop('disabled', true);
 
-            $.ajax({
-                url: '@Url.Action("GetCategoriesByTransaction", "IncidentalExpenses", new { area = "BudgetManager" })',
-                type: 'GET',
-                data: { transactionId: transactionId, itemId: itemId },
-                dataType: 'json',
-                success: function(data) {
-                    categoryDropdown.empty();
+        //     $.ajax({
+        //         url: '@Url.Action("GetCategoriesByTransaction", "IncidentalExpenses", new { area = "BudgetManager" })',
+        //         type: 'GET',
+        //         data: { transactionId: transactionId, itemId: itemId },
+        //         dataType: 'json',
+        //         success: function(data) {
+        //             categoryDropdown.empty();
 
-                    $.each(data.categories, function(i, category) {
+        //             $.each(data.categories, function(i, category) {
 
-                        const option = $('<option></option>')
-                                .val(category.id)
-                                .text(category.description);
+        //                 const option = $('<option></option>')
+        //                         .val(category.id)
+        //                         .text(category.description);
 
-                        if (category.id === data.selectedCategory) {
-                            option.prop('selected', true);
-                        }
+        //                 if (category.id === data.selectedCategory) {
+        //                     option.prop('selected', true);
+        //                 }
 
-                        categoryDropdown.append(option);
+        //                 categoryDropdown.append(option);
 
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error loading categories:', error);
-                    categoryDropdown.html('<option value="">Error loading categories</option>');
-                },
-                complete: function() {
-                    categoryDropdown.prop('disabled', false);
-                }
-            });
-        }
+        //             });
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.error('Error loading categories:', error);
+        //             categoryDropdown.html('<option value="">Error loading categories</option>');
+        //         },
+        //         complete: function() {
+        //             categoryDropdown.prop('disabled', false);
+        //         }
+        //     });
+        // }
 
         function saveItem(incidental_item) {  
             const amount = parseFloat($('#newAmount').val()) || 0;  
-            const formattedAmount = $('#categoryDropdown').text().trim() !== "Receive" ? (Math.abs(amount) * -1) : Math.abs(amount);
+            const formattedAmount = $('#categoryDropdown option:selected').text().trim() !== "Receive" ? (Math.abs(amount) * -1) : Math.abs(amount);
+
+            console.log($('#categoryDropdown option:selected').text().trim());
+            console.log(formattedAmount);
 
             const itemId = $(incidental_item).attr("id").split('-')[1];
 
@@ -248,8 +187,9 @@
                 Amount: formattedAmount,
                 IsPaid: document.querySelector('[id="newPaid"]').checked,
                 Date: $('#newDate').val(),  
-                TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,  
-                Category_catId: parseInt($('#categoryDropdown').val()) || 0  
+                // TransactionTypeId: parseInt($('#transactionDropdown').val()) || 0,
+                TransactionTypeId: parseInt($('#categoryDropdown').val()) == 21 ? 3 : 2,
+                Category_catId: parseInt($('#categoryDropdown').val()) || 0 
             };
 
             // Get selected month and year from dropdowns above the table  
@@ -280,8 +220,9 @@
                 headers: {  
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()  
                 },  
-                success: function(response) {  
-                    if (response.success) {  
+                success: function(response) {
+                    if (response.success) {
+                        $('#ModifyModal').modal('hide');
                         refreshIncidentalExpensesTable();  
                     }  
                 },  
@@ -332,6 +273,7 @@
                         'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                     },
                     success: function (response) {
+                        $('#ModifyModal').modal('hide');
                         refreshIncidentalExpensesTable();
                     },
                     error: function (xhr, status, error) {
@@ -378,8 +320,37 @@
             window.location.href = url;
         }
 
-        // function lockDynamicRow() {
-        //     $('#_IncidentalExpensesDynamicRow').find('button, input, select').prop('disabled', true);
-        // }
+        function loadIncidentalItemModal(itemId) {
+            if(window.matchMedia("(max-width: 750px)").matches) {
+                poster.on("Loading");
+
+                // Request modal content
+                $.ajax({
+                    url: '@Url.Action("LoadModifyModal", "IncidentalExpenses", new { area = "BudgetManager" })',
+                    type: 'POST',
+                    data: { itemId: itemId },
+                    headers: {
+                        // Include anti-forgery token for security
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        // Insert modal content and show the modal
+                        $('#ModifyModalContent').html(response);
+                        $('#ModifyModal').modal('show');
+                    },
+                    error: function (xhr, status, error) {
+                        // Log detailed error information for debugging
+                        console.error('Error:', error);
+                        console.log('Status:', status);
+                        console.log('Response:', xhr.responseText);
+                    },
+                    complete: function() {
+                        // Hide loading indicator regardless of success/failure
+                        poster.off();
+                    }
+                });
+            }
+        }
+
     </script>  
 }

@@ -68,7 +68,7 @@ else
         }
         else
         {
-            <td><span id="@item.Id" class="ledger-item-name" onclick="loadLedgerItemModal(@item.Id)">@item.Name</span></td>
+            <td><span id="@item.Id" class="line-item-name" onclick="loadLedgerItemModal(@item.Id)">@item.Name</span></td>
         }
         <td class="hide-cells-on-small-display">@item.Description</td>
         @if (item.TransactionType_tstId == 1 && item.Id == Model.EditableItemId)
