@@ -46,6 +46,10 @@
             padding: 0.5rem 0.25rem;
         }
 
+    .hide-cells-on-small-display {
+        display: table-cell;
+    }
+
     .ledger-filter-bar {
         display: flex;
         align-items: end;
@@ -71,6 +75,19 @@
     }
 
     @@media (max-width: 750px) {
+
+        table {
+            font-size: 0.8rem;
+        }
+
+        .ledger-item-name {
+            text-decoration: underline;
+        }
+
+        .hide-cells-on-small-display {
+            display: none;
+        }
+
         .ledger-filter-bar {
             align-items: start;
         }
@@ -87,6 +104,15 @@
     }
 
 </style>
+
+<!-- modal -->
+<div class="modal fade" id="LedgerItemModal" role="dialog" aria-hidden="True">
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content" id="LedgerItemModalContent">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <h2 class="mb-4">Ledger</h2>
@@ -163,9 +189,9 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th width="1%"></th>
+                            <th class="hide-cells-on-small-display" width="1%"></th>
                             <th>Expense</th>
-                            <th>Description</th>
+                            <th class="hide-cells-on-small-display">Description</th>
                             <th>Date</th>
                             <th>Paid</th>
                             <th>Checking Amount</th>
@@ -303,6 +329,7 @@
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(response) {
+                    $('#LedgerItemModal').modal('hide');
                     if (response.success) {
                         refreshLedgerTable();
                     }
@@ -393,6 +420,40 @@
                 });
             } else {
                 poster.off();
+            }
+        }
+
+        function loadLedgerItemModal(itemId) {
+            if(window.matchMedia("(max-width: 750px)").matches) {
+                console.log("test", itemId);
+
+                poster.on("Loading");
+
+                // Request modal content
+                $.ajax({
+                    url: '@Url.Action("LoadLedgerItemModal", "Ledger", new { area = "BudgetManager" })',
+                    type: 'POST',
+                    data: { itemId: itemId },
+                    headers: {
+                        // Include anti-forgery token for security
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        // Insert modal content and show the modal
+                        $('#LedgerItemModalContent').html(response);
+                        $('#LedgerItemModal').modal('show');
+                    },
+                    error: function (xhr, status, error) {
+                        // Log detailed error information for debugging
+                        console.error('Error:', error);
+                        console.log('Status:', status);
+                        console.log('Response:', xhr.responseText);
+                    },
+                    complete: function() {
+                        // Hide loading indicator regardless of success/failure
+                        poster.off();
+                    }
+                });
             }
         }
     </script>

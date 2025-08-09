@@ -181,6 +181,42 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
+        public async Task<LedgerItem_VModel> GetLedgerItemById(int id)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var item = (await connection.QueryAsync<LedgerItem_VModel>(
+                    "SELECT * FROM fnc_get_ledger_item_by_id(@id)", new { id }
+                )).FirstOrDefault();
+
+                if (item == null)
+                {
+                    return new LedgerItem_VModel();
+                }
+
+                return item;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new LedgerItem_VModel();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetLedgerItemById: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new LedgerItem_VModel();
+            }
+        }
+
+
         public async Task<(decimal, decimal)> GetEndingBalances(int month, int year)
         {
             try
