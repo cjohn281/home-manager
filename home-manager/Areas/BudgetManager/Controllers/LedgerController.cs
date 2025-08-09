@@ -144,6 +144,16 @@ namespace home_manager.Areas.BudgetManager.Controllers
 
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoadLedgerItemModal(int itemId)
+        {
+            Debug.WriteLine(itemId);
+            var model = await _repository.GetLedgerItemById(itemId);
+
+            return PartialView("_LedgerItemModal", model);
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

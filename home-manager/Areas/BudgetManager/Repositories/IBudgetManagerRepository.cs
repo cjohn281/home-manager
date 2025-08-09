@@ -10,6 +10,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<IEnumerable<int>> GetAvailableLedgerMonths();
         Task<IEnumerable<int>> GetAvailableLedgerYears();
         Task<IEnumerable<LedgerItem_VModel>> GetLedgerItemsByMonth(int month, int year);
+        Task<LedgerItem_VModel> GetLedgerItemById(int id);
         Task<(decimal, decimal)> GetEndingBalances(int month, int year);
         Task<(decimal, decimal)> GetBalanceDetails(int month, int year);
         Task<decimal> GetBalanceBeforeNextPay(int month, int year);
