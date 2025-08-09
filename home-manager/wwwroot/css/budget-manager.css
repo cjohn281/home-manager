@@ -109,6 +109,11 @@ input[type="number"] {
 
 @media (max-width: 750px) {
 
+    .container {
+        max-width: 98vw !important;
+        padding: 0 2px;
+    }
+
     table {
         font-size: 0.8rem;
     }
