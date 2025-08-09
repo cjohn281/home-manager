@@ -3,44 +3,6 @@
     ViewData["Title"] = "Recurring Expenses";
 }
 
-<style>
-    .container {
-        max-width: 95vw !important;
-        margin: 0 auto;
-        padding: 0 10px;
-    }
-
-    .card {
-        width: 100%;
-        margin: 0;
-    }
-
-    .card-body {
-        padding: 1rem 0.5rem;
-    }
-
-    .table {
-        margin: 0;
-    }
-
-        .table td, .table th {
-            padding: 0.5rem 0.25rem;
-        }
-
-    #filter-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: end;
-        width: auto;
-    }
-
-    #add-expense-btn {
-        border: none;
-        padding: 0;
-        margin-right: 0.5rem;
-    }
-</style>
-
 <div class="modal fade" id="ModifyModal" role="dialog" aria-hidden="True">
     <div class="modal-dialog modal-custom" role="document">
         <div class="modal-content" id="ModifyModalContent">
@@ -89,27 +51,26 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th></th>
+                            <th class="hide-cells-on-small-display"></th>
+                            <th class="hide-cells-on-small-display"></th>
                             <th>Name</th>
-                            <th>Category</th>
+                            <th class="hide-cells-on-small-display">Category</th>
                             <th class="text-end">Minimum Due</th>
                             <th class="text-end">Balance</th>
                             <th class="text-end">Interest Rate</th>
-                            <th></th>
                             <th>Day</th>
-                            <th>Jan</th>
-                            <th>Feb</th>
-                            <th>Mar</th>
-                            <th>Apr</th>
-                            <th>May</th>
-                            <th>Jun</th>
-                            <th>Jul</th>
-                            <th>Aug</th>
-                            <th>Sep</th>
-                            <th>Oct</th>
-                            <th>Nov</th>
-                            <th>Dec</th>
+                            <th class="hide-cells-on-small-display">Jan</th>
+                            <th class="hide-cells-on-small-display">Feb</th>
+                            <th class="hide-cells-on-small-display">Mar</th>
+                            <th class="hide-cells-on-small-display">Apr</th>
+                            <th class="hide-cells-on-small-display">May</th>
+                            <th class="hide-cells-on-small-display">Jun</th>
+                            <th class="hide-cells-on-small-display">Jul</th>
+                            <th class="hide-cells-on-small-display">Aug</th>
+                            <th class="hide-cells-on-small-display">Sep</th>
+                            <th class="hide-cells-on-small-display">Oct</th>
+                            <th class="hide-cells-on-small-display">Nov</th>
+                            <th class="hide-cells-on-small-display">Dec</th>
                             <th>Paid Off</th>
                         </tr>
                     </thead>
@@ -221,6 +182,7 @@
                     },
                     success: function (response) {
                         // Reload the table after successful deletion
+                        $('#ModifyModal').modal('hide');
                         loadRecurringExpensesTable(document.getElementById('currentCategoryId').value);
                     },
                     error: function (xhr, status, error) {
