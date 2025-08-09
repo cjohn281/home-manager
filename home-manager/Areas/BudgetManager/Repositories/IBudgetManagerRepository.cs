@@ -39,6 +39,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
 
         Task<IEnumerable<IncomeLedgerItem>> GetIncomeLedgerItems(int month, int year);
         Task<IEnumerable<SavingsLedgerItem>> GetSavingsLedgerItems(int month, int year);
+        Task<SavingsLedgerItem> GetSavingsLedgerItemById(int id);
         Task<bool> DeleteSavingsLedgerItem(int itemId);
     }
 }

@@ -1163,6 +1163,42 @@ namespace home_manager.Areas.BudgetManager.Repositories
         }
 
 
+        public async Task<SavingsLedgerItem> GetSavingsLedgerItemById(int id)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var item = (await connection.QueryAsync<SavingsLedgerItem>(
+                    "SELECT * FROM fnc_get_savings_ledger_item_by_id(@id)", new { id }
+                )).FirstOrDefault();
+
+                if (item == null)
+                {
+                    return new SavingsLedgerItem();
+                }
+
+                return item;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new SavingsLedgerItem();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetSavingsLedgerItemById: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new SavingsLedgerItem();
+            }
+        }
+
+
         public async Task<bool> DeleteSavingsLedgerItem(int itemId)
         {
             try

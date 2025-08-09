@@ -148,6 +148,8 @@ namespace home_manager.Areas.BudgetManager.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoadModifyModal(int itemID)
         {
             var model = await _repository.GetIncidentalItemById(itemID);
