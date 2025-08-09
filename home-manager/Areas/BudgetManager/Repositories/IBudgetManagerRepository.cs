@@ -38,8 +38,11 @@ namespace home_manager.Areas.BudgetManager.Repositories
 
 
         Task<IEnumerable<IncomeLedgerItem>> GetIncomeLedgerItems(int month, int year);
+        Task<IncomeLedgerItem> GetIncomeLedgerItemById(int id);
         Task<IEnumerable<SavingsLedgerItem>> GetSavingsLedgerItems(int month, int year);
         Task<SavingsLedgerItem> GetSavingsLedgerItemById(int id);
         Task<bool> DeleteSavingsLedgerItem(int itemId);
+
+        Task<IEnumerable<Person>> GetPersonList();
     }
 }
