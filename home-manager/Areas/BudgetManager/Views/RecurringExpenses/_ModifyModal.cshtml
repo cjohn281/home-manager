@@ -2,38 +2,6 @@
 @using home_manager.Helpers
 @model ModifyItemCombinedViewModel
 
-<style>
-    /* Remove spinner controls from number inputs */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-
-    #month-checkbox-container {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .form-check {
-        margin: 0;
-        padding: 5px;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-
-    .form-check-input:checked {
-        background-color: var(--bs-success);
-        border-color: var(--bs-success);
-    }
-</style>
-
 <div class="modal-header">
     @if(Model.ModifyItem.Item.Id > 0)
     {
@@ -177,9 +145,14 @@
         </div>
     </form>
 </div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="button" class="btn btn-primary" onclick="saveItem()">Save Changes</button>
+<div class="modal-footer modify-modal-footer">
+    <div>
+        <button type="button" class="btn btn-danger" id="edit-@Model.ModifyItem.Item.Id-@Model.ModifyItem.Item.Name" onclick="deleteRecurringItem(this)" style='@(Model.ModifyItem.Item.Id == 0 ? "display: none;" : "")'>Delete Item</button>
+    </div>
+    <div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveItem()">Save Changes</button>
+    </div>
 </div>
 
 <script>
