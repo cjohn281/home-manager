@@ -44,5 +44,7 @@ namespace home_manager.Areas.BudgetManager.Repositories
         Task<bool> DeleteSavingsLedgerItem(int itemId);
 
         Task<IEnumerable<Person>> GetPersonList();
+        Task<IEnumerable<IncomeDetail>> GetIncomeDetails();
+        Task<IEnumerable<LookupValue_VModel>> GetLookupValuesByType(int type_id);
     }
 }

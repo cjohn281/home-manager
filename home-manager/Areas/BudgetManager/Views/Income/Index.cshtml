@@ -70,6 +70,7 @@
         <div class="card-body">
             <input type="hidden" id="currentMonthId" value="@TimeZoneHelper.LocalTime.Month" />
             <input type="hidden" id="currentYearId" value="@TimeZoneHelper.LocalTime.Year" />
+            <a href="javascript:void(0)" onclick="navigateToIncomeDetail()"><h6>Edit Income Details</h6></a>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -138,6 +139,13 @@
 
             // Construct the URL. Replace "YourControllerName" with the actual controller name.
             var url = '@Url.Action("Index", "Income", new { area = "BudgetManager" })' + "?month=" + month + "&year=" + year;
+
+            window.location.href = url;
+        }
+
+        function navigateToIncomeDetail() {
+            // Construct the URL. Replace "YourControllerName" with the actual controller name.
+            var url = '@Url.Action("Index", "IncomeDetail", new { area = "BudgetManager" })';
 
             window.location.href = url;
         }

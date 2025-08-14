@@ -1304,5 +1304,82 @@ namespace home_manager.Areas.BudgetManager.Repositories
                 return new List<Person> { new Person() };
             }
         }
+
+
+        public async Task<IEnumerable<IncomeDetail>> GetIncomeDetails()
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var items = (await connection.QueryAsync<IncomeDetail>(
+                    "SELECT * FROM fnc_get_income_details()"))?.ToList();
+
+                if (items == null || items.Count == 0)
+                {
+                    return new List<IncomeDetail> { new IncomeDetail() };
+                }
+
+                return items;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<IncomeDetail> { new IncomeDetail() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetIncomeDetails: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<IncomeDetail> { new IncomeDetail() };
+            }
+        }
+
+
+        public async Task<IEnumerable<LookupValue_VModel>> GetLookupValuesByType(int typeId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_dbConnection.GetConnectionString());
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    id = typeId,
+                };
+
+                var lookupValues = (await connection.QueryAsync<LookupValue_VModel>(
+                    "SELECT * FROM fnc_get_lookup_values_by_type(@id)", parameters
+                ))?.ToList();
+
+                if (lookupValues == null || lookupValues.Count == 0)
+                {
+                    return new List<LookupValue_VModel> { new LookupValue_VModel() };
+                }
+
+                return lookupValues;
+            }
+            catch (PostgresException pgEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"PostgreSQL Error: {pgEx.MessageText}");
+                System.Diagnostics.Debug.WriteLine($"Detail: {pgEx.Detail}");
+                System.Diagnostics.Debug.WriteLine($"Hint: {pgEx.Hint}");
+                System.Diagnostics.Debug.WriteLine($"Position: {pgEx.Position}");
+                System.Diagnostics.Debug.WriteLine($"SqlState: {pgEx.SqlState}");
+                return new List<LookupValue_VModel> { new LookupValue_VModel() };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"General Error in GetLookupValuesByType: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<LookupValue_VModel> { new LookupValue_VModel() };
+            }
+
+        }
     }
 }
