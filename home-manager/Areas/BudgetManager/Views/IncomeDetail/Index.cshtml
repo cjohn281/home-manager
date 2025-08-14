@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Income Detail";
+}
+
+<div class="container">
+    <h2 class="mb-4">Income Details</h2>
+    <a href="javascript:void(0)" onclick="navigateToIncome()"><h6>Back to Income</h6></a>
+    <div class="card">
+        <div class="card-body">
+            <input type="hidden" id="edit-item" name="edit-item" value="0" />
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead>
+                        <tr>
+                            <th class="hide-cells-on-small-display" width="1%"></th>
+                            <th class="hide-cells-on-small-display" width="1%"></th>
+                            <th class="text-start">Person</th>
+                            <th width="16%">Pay Amount</th>
+                            <th width="16%">Pay Frequency</th>
+                            <th width="16%">Pay Date 1</th>
+                            <th width="16%">Pay Date 2</th>
+                            <th width="16%">Valid Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="_IncomeDetailTable">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            refreshIncomeDetailTable();
+        });
+
+        function loadIncomeDetailTable() {
+            poster.on()
+
+            $.ajax({
+                url: '@Url.Action("GetIncomeDetailTable", "IncomeDetail", new { area = "BudgetManager" })',
+                type: 'POST',
+                data: { editableId: parseInt($('#edit-item').val()) },
+                headers: {
+                    // Include anti-forgery token for security
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(data) {
+                    $('#_IncomeDetailTable').html(data);
+                },
+                error: function (xhr, status, error) {
+                    // Log detailed error information for debugging
+                    console.error('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
+                },
+                complete: function() {
+                    // Hide loading indicator regardless of success/failure
+                    poster.off();
+                }
+            });
+        }
+
+
+        function enableEditMode(itemId) {
+            $('#edit-item').val(itemId);
+            loadIncomeDetailTable();
+        }
+
+
+        function refreshIncomeDetailTable() {
+            $('#edit-item').val('0');
+            loadIncomeDetailTable();
+        }
+
+
+        function navigateToIncome() {
+            // Construct the URL. Replace "YourControllerName" with the actual controller name.
+            var url = '@Url.Action("Index", "Income", new { area = "BudgetManager" })';
+
+            window.location.href = url;
+        }
+    </script>
+}
